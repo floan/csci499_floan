@@ -1,0 +1,18 @@
+
+# Ignoring all files without extensions (unix executable files)
+# Ignore all
+*
+
+# Unignore all with extensions
+!*.*
+
+# Unignore all dirs
+!*/
+
+# Ignoring other irrelevant files
+.DS_Store
+CMakeFiles/
+CMakeCache.txt
+Makefile
+cmake_install.cmake
+gflags/
