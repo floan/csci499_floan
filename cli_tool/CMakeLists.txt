@@ -5,5 +5,3 @@ project(Faz)
 add_subdirectory(gflags)
 add_executable(main main.cpp)
 target_link_libraries(main gflags::gflags)
-
-
