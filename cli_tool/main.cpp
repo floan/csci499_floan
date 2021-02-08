@@ -14,15 +14,8 @@ DEFINE_bool(profile, false, "Gets the user’s profile of following and follower
 int main(int argc, char* argv[]) {
   // Checking and handeling arguments 
   if (argc < 2) {
-    std::cout << "You did not specify any program functions." << std::endl;
-    std::cout << "Please consider using one of the following: " << std::endl;
-    std::cout << "\t --registeruser <username>" << std::endl;
-    std::cout << "\t --user <username>" << std::endl;
-    std::cout << "\t --caw <caw text>" << std::endl;
-    std::cout << "\t --reply <reply caw id>" << std::endl;
-    std::cout << "\t --follow <username>" << std::endl;
-    std::cout << "\t --read <caw id>" << std::endl;
-    std::cout << "\t --profile" << std::endl;
+    gflags::ShowUsageWithFlags(argv[0]);
+    return 1; 
   }
 
   gflags::ParseCommandLineFlags(&argc, &argv, true);
@@ -32,13 +25,13 @@ int main(int argc, char* argv[]) {
   if (FLAGS_registeruser == "" && FLAGS_user == "") {
     std::cerr << "You cannot perform any action without specifying a username" << std::endl;
     std::cerr << "Please consider using the --user <username> flag" << std::endl;
-    return 0;
+    return 1;
   }
 
   if (FLAGS_reply != -1 && FLAGS_caw == "") {
     std::cerr << "You cannot reply without specifying a caw" << std::endl;
     std::cerr << "Please consider using the --caw <caw text> flag" << std::endl;
-    return 0;
+    return 1;
   }
 
   // Error checking done, handeling arguments
