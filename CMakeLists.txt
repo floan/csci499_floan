@@ -14,6 +14,7 @@ FetchContent_Declare(
         GIT_TAG       release-1.10.0
 )
 FetchContent_MakeAvailable(googletest)
+enable_testing()
 
 FetchContent_Declare(
         gflags
@@ -76,4 +77,7 @@ target_link_libraries(caw_cli gflags::gflags)
 
 add_executable(kv_store src/key_value_store/kv_store.cpp ${store_proto_srcs} ${store_grpc_srcs})
 target_link_libraries(kv_store ${_GRPC_GRPCPP} ${_PROTOBUF_LIBPROTOBUF} gflags::gflags glog::glog)
+
+add_executable(kv_store_test tests/KeyValueStoreTests.cpp src/key_value_store/core/KeyValueStore.cpp)
+target_link_libraries(kv_store_test gtest gtest_main)
 
