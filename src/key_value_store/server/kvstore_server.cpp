@@ -15,9 +15,8 @@ Status KeyValueStoreImpl::put(ServerContext* context,
 Status KeyValueStoreImpl::get(ServerContext* context,
     ServerReaderWriter<GetReply, GetRequest>* stream) override {
   // TODO: ASK WHY WE RECIEVE A STREAM OF REQUESTS 
-  // BECAUSE THE VALUES WILL BE SENT IN ONE RESPONSE 
-  // SO WE WILL NOT KNOW WHICH VALUE IS ASSOCIATED WITH
-  // WHICH KEY 
+  // INSTEAD OF JUST ONE REQUEST
+  // SINCE WE ARE ONLY SENDING ONE KEY
 
   GetRequest request;
   while (stream->Read(&request)) {
