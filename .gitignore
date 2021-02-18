@@ -14,5 +14,5 @@ CMakeFiles/
 CMakeCache.txt
 Makefile
 cmake_install.cmake
-gflags/
 cpplint.py
+build/
