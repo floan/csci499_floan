@@ -1,6 +1,6 @@
-#include "../../../build/store.grpc.pb.h"
+#include <grpcpp/grpcpp.h>
 
-#include "grpcpp/grpcpp.h"
+#include "store.grpc.pb.h"
 
 #include "../core/KeyValueStore.h"
 
@@ -9,6 +9,7 @@ using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::ServerReaderWriter;
 using grpc::Status;
+using grpc::StatusCode;
 
 using kvstore::PutRequest;
 using kvstore::PutReply;

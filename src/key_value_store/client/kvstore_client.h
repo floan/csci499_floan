@@ -1,9 +1,8 @@
-#include "../../../build/store.grpc.pb.h"
+#include <grpcpp/grpcpp.h>
+#include "store.grpc.pb.h"
 
 #include <string>
 #include <vector>
-
-#include "grpcpp/grpcpp.h"
 
 #include "../core/KeyValueStore.h"
 

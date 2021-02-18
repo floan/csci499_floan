@@ -1,11 +1,10 @@
 #include "kvstore_server.h"
 
+
 void RunServer() {
   std::string server_address("0.0.0.0:50001");
   KeyValueStoreImpl service;
 
-  grpc::EnableDefaultHealthCheckService(true);
-  grpc::reflection::InitProtoReflectionServerBuilderPlugin();
   ServerBuilder builder;
   // Listen on the given address without any authentication mechanism.
   builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
