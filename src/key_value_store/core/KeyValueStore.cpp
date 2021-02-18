@@ -14,13 +14,8 @@ bool KeyValueStore::Put(std::string key, std::string value) {
   const std::lock_guard<std::mutex> lock(lock_);
   // If this key already exists in the store
   if (kv_store_.find(key) != kv_store_.end()) {
-    // If user puts the same function
-    if (CheckIfExists(kv_store_[key], value)) {
-      result = false;
-    } else {
-      kv_store_[key].push_back(value);
-      result = true;
-    }
+    kv_store_[key].push_back(value);
+    result = true;
   } else { // If they key doesn't exist
     //Create a new vector with `value`
     result = kv_store_.insert({key, {value}}).second;
