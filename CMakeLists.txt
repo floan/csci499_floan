@@ -64,12 +64,24 @@ add_custom_command(
         "${store_proto}"
       DEPENDS "${store_proto}")
 
+get_filename_component(caw_proto "protos/caw.proto" ABSOLUTE)
+get_filename_component(caw_proto_path "${caw_proto}" PATH)
+
+# Generated sources
+set(caw_proto_srcs "${CMAKE_CURRENT_BINARY_DIR}/caw.pb.cc")
+set(caw_proto_hdrs "${CMAKE_CURRENT_BINARY_DIR}/caw.pb.h")
+
+add_custom_command(
+      OUTPUT "${caw_proto_srcs}" "${caw_proto_hdrs}"
+      COMMAND ${_PROTOBUF_PROTOC}
+      ARGS --cpp_out "${CMAKE_CURRENT_BINARY_DIR}"
+        -I "${caw_proto_path}"
+        --plugin=protoc-gen-grpc="${_GRPC_CPP_PLUGIN_EXECUTABLE}"
+        "${caw_proto}"
+      DEPENDS "${caw_proto}")
+
 # Include generated *.pb.h files
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
-
-
-# Caw will have no .grpc lines and remove --grpc_out
-
 
 
 add_executable(caw_cli src/cli_tool/caw_cli.cpp)
@@ -77,6 +89,9 @@ target_link_libraries(caw_cli gflags::gflags)
 
 add_executable(kv_store src/key_value_store/kv_store.cpp ${store_proto_srcs} ${store_grpc_srcs})
 target_link_libraries(kv_store ${_GRPC_GRPCPP} ${_PROTOBUF_LIBPROTOBUF} gflags::gflags glog::glog)
+
+add_executable(caw src/caw/caw.cpp ${caw_proto_srcs} ${caw_grpc_srcs})
+target_link_libraries(caw ${_GRPC_GRPCPP} ${_PROTOBUF_LIBPROTOBUF} gflags::gflags glog::glog)
 
 add_executable(kv_store_test tests/KeyValueStoreTests.cpp src/key_value_store/core/KeyValueStore.cpp)
 target_link_libraries(kv_store_test gtest gtest_main)
