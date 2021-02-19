@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-bool KeyValueStoreClient::put(std::string key, std::string value) {
+bool KeyValueStoreClient::Put(std::string key, std::string value) {
   PutRequest request; 
   PutReply response; 
   ClientContext context;
@@ -23,7 +23,7 @@ bool KeyValueStoreClient::put(std::string key, std::string value) {
   }
 }
 
-std::vector<std::string> KeyValueStoreClient::get(std::string key) {
+std::vector<std::string> KeyValueStoreClient::Get(std::string key) {
   GetRequest request; 
   ClientContext context; 
   request.set_key(key);
@@ -52,7 +52,7 @@ std::vector<std::string> KeyValueStoreClient::get(std::string key) {
   return values; 
 }
 
-bool KeyValueStoreClient::remove(std::string key) {
+bool KeyValueStoreClient::Remove(std::string key) {
   RemoveRequest request; 
   RemoveReply response; 
   ClientContext context;

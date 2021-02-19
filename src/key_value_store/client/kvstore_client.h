@@ -24,9 +24,9 @@ class KeyValueStoreClient final {
   KeyValueStoreClient(std::shared_ptr<Channel> channel)
     : stub_(Greeter::NewStub(channel)) {};
 
-  bool put(std::string key, std::string value);
-  std::vector<std::string> get(std::string key);
-  bool remove(std::string key);
+  bool Put(std::string key, std::string value);
+  std::vector<std::string> Get(std::string key);
+  bool Remove(std::string key);
 
  private:
   std::unique_ptr<kvstore::KeyValueStore::Stub> stub_;
