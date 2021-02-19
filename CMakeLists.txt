@@ -62,7 +62,28 @@ add_custom_command(
         -I "${store_proto_path}"
         --plugin=protoc-gen-grpc="${_GRPC_CPP_PLUGIN_EXECUTABLE}"
         "${store_proto}"
-      DEPENDS "${store_proto}")
+      DEPENDS "${store_proto}" "build/_deps/protobuf-src/src/google/protobuf/any.proto")
+
+
+get_filename_component(faz_proto "protos/faz.proto" ABSOLUTE)
+get_filename_component(faz_proto_path "${faz_proto}" PATH)
+
+# Generated sources
+set(faz_proto_srcs "${CMAKE_CURRENT_BINARY_DIR}/faz.pb.cc")
+set(faz_proto_hdrs "${CMAKE_CURRENT_BINARY_DIR}/faz.pb.h")
+set(faz_grpc_srcs "${CMAKE_CURRENT_BINARY_DIR}/faz.grpc.pb.cc")
+set(faz_grpc_hdrs "${CMAKE_CURRENT_BINARY_DIR}/faz.grpc.pb.h")
+
+add_custom_command(
+      OUTPUT "${faz_proto_srcs}" "${faz_proto_hdrs}" "${faz_grpc_srcs}" "${faz_grpc_hdrs}"
+      COMMAND ${_PROTOBUF_PROTOC}
+      ARGS --grpc_out "${CMAKE_CURRENT_BINARY_DIR}"
+        --cpp_out "${CMAKE_CURRENT_BINARY_DIR}"
+        -I "${faz_proto_path}"
+        -I "${CMAKE_CURRENT_BINARY_DIR}/_deps/protobuf-src/src"
+        --plugin=protoc-gen-grpc="${_GRPC_CPP_PLUGIN_EXECUTABLE}"
+        "${faz_proto}"
+      DEPENDS "${faz_proto}")
 
 # Include generated *.pb.h files
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
@@ -71,12 +92,14 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 # Caw will have no .grpc lines and remove --grpc_out
 
 
-
 add_executable(caw_cli src/cli_tool/caw_cli.cpp)
 target_link_libraries(caw_cli gflags::gflags)
 
 add_executable(kv_store src/key_value_store/kv_store.cpp ${store_proto_srcs} ${store_grpc_srcs})
 target_link_libraries(kv_store ${_GRPC_GRPCPP} ${_PROTOBUF_LIBPROTOBUF} gflags::gflags glog::glog)
+
+add_executable(faz src/faz/faz.cpp ${faz_proto_srcs} ${faz_grpc_srcs})
+target_link_libraries(faz ${_GRPC_GRPCPP} ${_PROTOBUF_LIBPROTOBUF} gflags::gflags glog::glog)
 
 add_executable(kv_store_test tests/KeyValueStoreTests.cpp src/key_value_store/core/KeyValueStore.cpp)
 target_link_libraries(kv_store_test gtest gtest_main)
