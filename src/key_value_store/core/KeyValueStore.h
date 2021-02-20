@@ -1,3 +1,5 @@
+#include "../KeyValueStoreInterface.h"
+
 #include <mutex>
 #include <string>
 #include <vector>
@@ -8,7 +10,7 @@ typedef std::unordered_map<std::string,
   std::vector<std::string>> hashMap; 
 
 
-class KeyValueStore {
+class KeyValueStore : public KeyValueStoreInterface {
  public:      
   //Declaring constructor & destructor in .h file
   KeyValueStore() {};

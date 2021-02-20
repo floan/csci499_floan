@@ -1,3 +1,5 @@
+#include "../KeyValueStoreInterface.h"
+
 #include <grpcpp/grpcpp.h>
 #include "store.grpc.pb.h"
 
@@ -18,7 +20,7 @@ using kvstore::GetReply;
 using kvstore::RemoveRequest;
 using kvstore::RemoveReply;
 
-class KeyValueStoreClient final {
+class KeyValueStoreClient final : public KeyValueStoreInterface {
  public:
 
   KeyValueStoreClient(std::shared_ptr<Channel> channel)
