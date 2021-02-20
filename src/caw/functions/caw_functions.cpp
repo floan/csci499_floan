@@ -1,8 +1,6 @@
 // This is a file that will contain the caw functions
 // to be registered with, and used by Faz
-
-#include <grpcpp/grpcpp.h>
-#include "caw.pb.h"
+#include "caw_functions.h"
 
 #include <string>
 #include <vector>
@@ -11,25 +9,6 @@
 #include <sys/time.h>
 #include <ctime>
 
-using grpc::Channel;
-using grpc::ClientContext;
-using grpc::ClientReaderWriter;
-using grpc::Status;
-using grpc::StatusCode;
-using grpc::Protobuf::Any;
-
-using caw::Timestamp;
-using caw::Caw;
-using caw::RegisteruserRequest;
-using caw::RegisteruserReply;
-using caw::CawRequest;
-using caw::CawReply;
-using caw::FollowRequest;
-using caw::FollowReply;
-using caw::ReadRequest;
-using caw::ReadReply;
-using caw::ProfileRequest;
-using caw::ProfileReply;
 
 bool isInList(std::vector<std::string> list, std::string key) {
   for (std::string s : list) {
@@ -40,7 +19,7 @@ bool isInList(std::vector<std::string> list, std::string key) {
   return false;
 }
 
-std::vector<std::string>> stringToVector(std::string) {
+std::vector<std::string> stringToVector(std::string) {
   std::stringstream ss(string);
   std::vector<std::string> toReturn; 
   std::string word;
@@ -86,7 +65,7 @@ Status RegisterUser(Any& EventRequest, Any& EventReply, KeyValueStoreInterface& 
   return status;
 }
 
-Status PostCaw(Any& EventRequest, Any& EventReply KeyValueStoreInterface& kvstore) {
+Status PostCaw(Any& EventRequest, Any& EventReply, KeyValueStoreInterface& kvstore) {
   CawRequest request;
   CawReply response;
   EventRequest.UnpackTo(&request);

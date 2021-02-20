@@ -8,7 +8,7 @@ using grpc::Channel;
 using grpc::ClientContext;
 using grpc::ClientReaderWriter;
 using grpc::Status;
-using grpc::Protobuf::Any;
+using google::protobuf::Any;
 
 using caw::Timestamp;
 using caw::Caw;

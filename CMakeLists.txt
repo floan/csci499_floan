@@ -83,6 +83,7 @@ add_custom_command(
       COMMAND ${_PROTOBUF_PROTOC}
       ARGS --cpp_out "${CMAKE_CURRENT_BINARY_DIR}"
         -I "${caw_proto_path}"
+        -I "${CMAKE_CURRENT_BINARY_DIR}/_deps/protobuf-src/src"
         --plugin=protoc-gen-grpc="${_GRPC_CPP_PLUGIN_EXECUTABLE}"
         "${caw_proto}"
       DEPENDS "${caw_proto}")
@@ -108,3 +109,6 @@ target_link_libraries(kv_store_runner ${_GRPC_GRPCPP} ${_PROTOBUF_LIBPROTOBUF} g
 
 add_executable(kv_store_test tests/KeyValueStoreTests.cpp src/key_value_store/core/KeyValueStore.cpp)
 target_link_libraries(kv_store_test gtest gtest_main)
+
+add_executable(caw_test tests/CawFunctionTests.cpp src/key_value_store/core/KeyValueStore.cpp src/caw/functions/caw_functions.cpp ${caw_proto_srcs})
+target_link_libraries(caw_test ${_GRPC_GRPCPP} ${_PROTOBUF_LIBPROTOBUF} gtest gtest_main)
