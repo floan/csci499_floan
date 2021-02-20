@@ -20,6 +20,7 @@ bool KeyValueStore::Put(std::string key, std::string value) {
     //Create a new vector with `value`
     result = kv_store_.insert({key, {value}}).second;
   }
+  //lock_guard releases the lock when the mutex goes out of scope
   return result; 
 }
 

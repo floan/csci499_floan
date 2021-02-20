@@ -39,6 +39,14 @@ FetchContent_MakeAvailable(grpc)
 
 # Setting up GRPC
 
+#Setting variables
+set(_PROTOBUF_LIBPROTOBUF libprotobuf)
+set(_PROTOBUF_PROTOC $<TARGET_FILE:protoc>)
+set(_GRPC_GRPCPP grpc++)
+set(_GRPC_CPP_PLUGIN_EXECUTABLE $<TARGET_FILE:grpc_cpp_plugin>)
+
+######################### GRPC SETUP FOR KVSTORE #############################
+
 get_filename_component(store_proto "protos/store.proto" ABSOLUTE)
 get_filename_component(store_proto_path "${store_proto}" PATH)
 
@@ -48,11 +56,6 @@ set(store_proto_hdrs "${CMAKE_CURRENT_BINARY_DIR}/store.pb.h")
 set(store_grpc_srcs "${CMAKE_CURRENT_BINARY_DIR}/store.grpc.pb.cc")
 set(store_grpc_hdrs "${CMAKE_CURRENT_BINARY_DIR}/store.grpc.pb.h")
 
-#Setting variables
-set(_PROTOBUF_LIBPROTOBUF libprotobuf)
-set(_PROTOBUF_PROTOC $<TARGET_FILE:protoc>)
-set(_GRPC_GRPCPP grpc++)
-set(_GRPC_CPP_PLUGIN_EXECUTABLE $<TARGET_FILE:grpc_cpp_plugin>)
 
 add_custom_command(
       OUTPUT "${store_proto_srcs}" "${store_proto_hdrs}" "${store_grpc_srcs}" "${store_grpc_hdrs}"
@@ -63,6 +66,10 @@ add_custom_command(
         --plugin=protoc-gen-grpc="${_GRPC_CPP_PLUGIN_EXECUTABLE}"
         "${store_proto}"
       DEPENDS "${store_proto}")
+
+####################### GRPC SETUP FOR KVSTORE END ############################
+
+######################### GRPC SETUP FOR CAW #############################
 
 get_filename_component(caw_proto "protos/caw.proto" ABSOLUTE)
 get_filename_component(caw_proto_path "${caw_proto}" PATH)
@@ -80,9 +87,12 @@ add_custom_command(
         "${caw_proto}"
       DEPENDS "${caw_proto}")
 
+######################### GRPC SETUP FOR CAW END #############################
+
 # Include generated *.pb.h files
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
+set(kvstore_dir src/key_value_store/)
 
 add_executable(caw_cli src/cli_tool/caw_cli.cpp)
 target_link_libraries(caw_cli gflags::gflags)
@@ -92,6 +102,9 @@ target_link_libraries(kv_store ${_GRPC_GRPCPP} ${_PROTOBUF_LIBPROTOBUF} gflags::
 
 add_executable(caw src/caw/caw.cpp ${caw_proto_srcs} ${caw_grpc_srcs})
 target_link_libraries(caw ${_GRPC_GRPCPP} ${_PROTOBUF_LIBPROTOBUF} gflags::gflags glog::glog)
+
+add_executable(kv_store_runner ${kvstore_dir}/server/kvstore_server_runner.cpp ${kvstore_dir}/server/kvstore_server.cpp ${kvstore_dir}/core/KeyValueStore.cpp ${store_proto_srcs} ${store_grpc_srcs})
+target_link_libraries(kv_store_runner ${_GRPC_GRPCPP} ${_PROTOBUF_LIBPROTOBUF} gflags::gflags glog::glog)
 
 add_executable(kv_store_test tests/KeyValueStoreTests.cpp src/key_value_store/core/KeyValueStore.cpp)
 target_link_libraries(kv_store_test gtest gtest_main)
