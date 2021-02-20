@@ -105,6 +105,8 @@ Status PostCaw(Any& EventRequest, KeyValueStoreInterface& kvstore) {
   return status;
 }
 
+// This function gets the main caw and all its subthreads
+// it does not get subthreads of its subthreads (1 level bfs, not dfs)
 Status ReadCaw(Any& EventRequest, Any& EventReply, KeyValueStoreInterface& kvstore) {
   ReadRequest request; 
   Caw caw;
@@ -121,30 +123,32 @@ Status ReadCaw(Any& EventRequest, Any& EventReply, KeyValueStoreInterface& kvsto
     std::vector<std::string> currentCaw;
     std::string childrenCawString;
     std::vector<std::string> childrenCaws;
-    std::stack<std::string> dfsStack; 
-    dfsStack.push(caw_id);
 
-    // Should never get a cyclic graph 
-    // So no need to keep a visited Array
-    while (!dfsStack.empty()) {
-      caw_id = dfsStack.top();
-      dfsStack.pop();
-      currentCaw = kvstore.Get("caw_" + caw_id);
+    currentCaw = kvstore.Get("caw_" + caw_id);
+    caw.set_username(currentCaw[0]);
+    caw.set_text(currentCaw[1]);
+    caw.set_id(caw_id);
+    caw.set_parent_id(currentCaw[2]);
+    caw.set_allocated_timestamp(currentCaw[3]);
+    // TODO: FIGURE OUT HOW TO WRITE THIS CAW TO 
+    // THE REPLY STREAM
+    childrenCawString = currentCaw[4];
+    childrenCaws = stringToVector(childrenCawString);
+    for (std::string id : childrenCaws) {
+      currentCaw = kvstore.Get("caw_" + id);
       caw.set_username(currentCaw[0]);
       caw.set_text(currentCaw[1]);
-      caw.set_id(caw_id);
+      caw.set_id(id);
       caw.set_parent_id(currentCaw[2]);
       caw.set_allocated_timestamp(currentCaw[3]);
       // TODO: FIGURE OUT HOW TO WRITE THIS CAW TO 
       // THE REPLY STREAM
-      childrenCawString = currentCaw[4];
-      childrenCaws = stringToVector(childrenCawString);
-      for (int i = childrenCaws.size() - 1; i >= 0; i--) {
-        dfsStack.push(childrenCaws[i]);
-      }
     }
+    status = Status::OK;
   }
 
+  EventReply.PackFrom(response);
+  return status;
 }
 
 
