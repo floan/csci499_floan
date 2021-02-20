@@ -1,4 +1,5 @@
 #include "caw.pb.h"
+#include <google/protobuf/any.pb.h>
 #include <grpcpp/grpcpp.h>
 
 #include <string>
@@ -28,8 +29,9 @@ using caw::Timestamp;
 
 // Helper functions
 bool isInList(std::vector<std::string> list, std::string key);
-std::vector<std::string> stringToVector(std::string);
-Caw makeCawFromId(std::string caw_id);
+std::vector<std::string> stringToVector(std::string strToConvert);
+void makeCawFromId(Caw *caw, std::string caw_id,
+                   KeyValueStoreInterface &kvstore);
 
 // Functions to be passed into Faz
 Status RegisterUser(Any &EventRequest, Any &EventReply,

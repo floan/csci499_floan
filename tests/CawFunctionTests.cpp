@@ -1,4 +1,5 @@
 #include "../src/caw/functions/caw_functions.h"
+#include "../src/key_value_store/core/KeyValueStore.h"
 
 #include <string>
 #include <vector>
