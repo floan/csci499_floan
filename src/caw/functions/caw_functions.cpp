@@ -7,6 +7,9 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <chrono>
+#include <sys/time.h>
+#include <ctime>
 
 using grpc::Channel;
 using grpc::ClientContext;
@@ -52,7 +55,7 @@ Caw makeCawFromId(std::string caw_id) {
   std::vector<std::string> currentCaw;
   Timestamp timestamp;
   std::vector<std::string> timestamps;
-  
+
   currentCaw = kvstore.Get("caw_" + caw_id);
 
   caw.set_username(currentCaw[0]);
@@ -101,8 +104,15 @@ Status PostCaw(Any& EventRequest, Any& EventReply KeyValueStoreInterface& kvstor
     std::string username = request.username(); 
     std::string text = request.text();
     std::string parent_id = request.parent_id();
-    Timestamp timestamp; 
-    // TODO: FIGURE OUT HOW TO GET TIMESTAMP
+    std::string timestamp; 
+    
+    auto millisec_since_epoch = chrono::duration_cast<chrono::milliseconds>(
+      chrono::system_clock::now().time_since_epoch()).count();
+    auto sec_since_epoch = chrono::duration_cast<chrono::seconds>(
+      chrono::system_clock::now().time_since_epoch()).count();
+    timestamp = to_string(sec_since_epoch);
+    timestamp += " ";
+    timestamp += to_string(millisec_since_epoch);
     // Now we will begin storing the caw in the kvstore
     // First we will store the caw id 
     kvstore.Put("all_caws", currentCawId);
