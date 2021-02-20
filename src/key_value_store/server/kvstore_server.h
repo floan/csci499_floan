@@ -11,27 +11,32 @@ using grpc::ServerReaderWriter;
 using grpc::Status;
 using grpc::StatusCode;
 
-using kvstore::PutRequest;
-using kvstore::PutReply;
-using kvstore::GetRequest;
 using kvstore::GetReply;
-using kvstore::RemoveRequest;
+using kvstore::GetRequest;
+using kvstore::PutReply;
+using kvstore::PutRequest;
 using kvstore::RemoveReply;
+using kvstore::RemoveRequest;
 
-class KeyValueStoreImpl final :
-public kvstore::KeyValueStore::Service {
- public:
+// This class implements the server side
+// functionality of the key value store
+class KeyValueStoreImpl final : public kvstore::KeyValueStore::Service {
+public:
+  KeyValueStoreImpl() : store_(){};
+  // This function performs normal put functionality
+  // by unwrapping protobuf messages
+  Status put(ServerContext *context, const PutRequest *request,
+             PutReply *response) override;
+  // This function performs normal get functionality
+  // by unwrapping protobuf messages
+  Status get(ServerContext *context,
+             ServerReaderWriter<GetReply, GetRequest> *stream) override;
+  // This function performs normal remove functionality
+  // by unwrapping protobuf messages
+  Status remove(ServerContext *context, const RemoveRequest *request,
+                RemoveReply *response) override;
 
-  KeyValueStoreImpl() : store_() {};
-
-  Status put(ServerContext* context, 
-    const PutRequest* request, PutReply* response) override;
-  Status get(ServerContext* context,
-    ServerReaderWriter<GetReply, GetRequest>* stream) override;
-  Status remove(ServerContext* context,
-    const RemoveRequest* request, RemoveReply* response) override;
-
- private:
+private:
   // Local variable from core class
-  KeyValueStore store_; 
+  KeyValueStore store_;
 };

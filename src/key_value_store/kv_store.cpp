@@ -1,9 +1,7 @@
 #include <iostream>
 
-#include <grpcpp/grpcpp.h>
 #include <gflags/gflags.h>
 #include <glog/logging.h>
+#include <grpcpp/grpcpp.h>
 
-int main(int argc, char** argv) {
-  return 0; 
-}
+int main(int argc, char **argv) { return 0; }

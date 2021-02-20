@@ -2,27 +2,32 @@
 
 #include <mutex>
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 // Alias for the unorderedList
-typedef std::unordered_map<std::string, 
-  std::vector<std::string>> hashMap; 
+typedef std::unordered_map<std::string, std::vector<std::string>> hashMap;
 
-
+// This class is implements our core key value
+// store functionality
 class KeyValueStore : public KeyValueStoreInterface {
- public:      
-  //Declaring constructor & destructor in .h file
-  KeyValueStore() {};
-  ~KeyValueStore() {};
-
+public:
+  // Declaring constructor & destructor in .h file
+  KeyValueStore(){};
+  ~KeyValueStore(){};
+  // Performs normal Put functionality
   bool Put(std::string key, std::string value);
+  // Performs normal Get functionality
+  // returns empty if key does not exist
   std::vector<std::string> Get(std::string key);
-  bool Remove(std::string key); 
+  // Performs normal remove functionality
+  bool Remove(std::string key);
 
- private:
-  bool CheckIfExists(std::vector<std::string> store, 
-    std::string value);
+private:
+  // This is the underlying data structure
+  // For our key value store
   hashMap kv_store_;
+  // Lock enables thread safe operation
+  // of our key value store
   std::mutex lock_;
 };
