@@ -189,7 +189,7 @@ Status GetProfile(Any& EventRequest, Any& EventReply, KeyValueStoreInterface& kv
   } else {
     std::vector<std::string>> followers = kvstore.Get("caw_user_" + request.username() + "_followers");
     std::vector<std::string>> following = kvstore.Get("caw_user_" + request.username() + "_following");
-    // TODO: FIGURE OUT HOW TO WRITE OT RESPONSE
+    // TODO: FIGURE OUT HOW TO WRITE TO RESPONSE
     status = Status::OK;
   }
   EventReply.PackFrom(response);
