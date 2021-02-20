@@ -47,6 +47,26 @@ std::vector<std::string>> stringToVector(std::string) {
   return toReturn;
 }
 
+Caw makeCawFromId(std::string caw_id) {
+  Caw caw;
+  std::vector<std::string> currentCaw;
+  Timestamp timestamp;
+  std::vector<std::string> timestamps;
+  
+  currentCaw = kvstore.Get("caw_" + caw_id);
+
+  caw.set_username(currentCaw[0]);
+  caw.set_text(currentCaw[1]);
+  caw.set_id(caw_id);
+  caw.set_parent_id(currentCaw[2]);
+  // Construct the timestamp and set it
+  timestamps = stringToVector(currentCaw[3]);
+  timestamp.set_seconds(timestamps[0]);
+  timestamp.set_useconds(timestamps[1]);
+  caw.set_allocated_timestamp(timestamp);
+  return caw; 
+}
+
 Status RegisterUser(Any& EventRequest, Any& EventReply, KeyValueStoreInterface& kvstore) {
   RegisteruserRequest request;
   RegisteruserReply response;
@@ -82,6 +102,7 @@ Status PostCaw(Any& EventRequest, Any& EventReply KeyValueStoreInterface& kvstor
     std::string text = request.text();
     std::string parent_id = request.parent_id();
     Timestamp timestamp; 
+    // TODO: FIGURE OUT HOW TO GET TIMESTAMP
     // Now we will begin storing the caw in the kvstore
     // First we will store the caw id 
     kvstore.Put("all_caws", currentCawId);
@@ -120,40 +141,31 @@ Status PostCaw(Any& EventRequest, Any& EventReply KeyValueStoreInterface& kvstor
 // it does not get subthreads of its subthreads (1 level bfs, not dfs)
 Status ReadCaw(Any& EventRequest, Any& EventReply, KeyValueStoreInterface& kvstore) {
   ReadRequest request; 
-  Caw caw;
   ReadReply response;
   Status status;
   EventRequest.UnpackTo(&request);
   std::string caw_id = request.caw_id();
   std::vector<std::string> all_caws = kvstore.Get("all_caws");
+
   if (!isInList(all_caws, caw_id)) {
     status = Status(StatusCode::NOT_FOUND, "The provided caw does not exist.");
   } else {
-    // We will perform a dfs tree traversal 
-    // To get all threads and sub threads
+    // We will perform a level one bfs traversal 
+    // To get child threads
     std::vector<std::string> currentCaw;
     std::string childrenCawString;
     std::vector<std::string> childrenCaws;
-
+    
     currentCaw = kvstore.Get("caw_" + caw_id);
-    caw.set_username(currentCaw[0]);
-    caw.set_text(currentCaw[1]);
-    caw.set_id(caw_id);
-    caw.set_parent_id(currentCaw[2]);
-    caw.set_allocated_timestamp(currentCaw[3]);
-    // TODO: FIGURE OUT HOW TO WRITE THIS CAW TO 
-    // THE REPLY STREAM
+    
+    // Add this caw to the reply stream
+    response.add_caws(makeCawFromId(caw_id));
     childrenCawString = currentCaw[4];
     childrenCaws = stringToVector(childrenCawString);
+    // repeat process for children
     for (std::string id : childrenCaws) {
-      currentCaw = kvstore.Get("caw_" + id);
-      caw.set_username(currentCaw[0]);
-      caw.set_text(currentCaw[1]);
-      caw.set_id(id);
-      caw.set_parent_id(currentCaw[2]);
-      caw.set_allocated_timestamp(currentCaw[3]);
-      // TODO: FIGURE OUT HOW TO WRITE THIS CAW TO 
-      // THE REPLY STREAM
+      // Add all the children caws to the reply stream
+      response.add_caws(makeCawFromId(id));
     }
     status = Status::OK;
   }
@@ -162,14 +174,20 @@ Status ReadCaw(Any& EventRequest, Any& EventReply, KeyValueStoreInterface& kvsto
   return status;
 }
 
-Status FollowUser(Any& EventRequest, KeyValueStoreInterface& kvstore) {
+Status FollowUser(Any& EventRequest, Any& EventReply, KeyValueStoreInterface& kvstore) {
   FollowRequest request; 
+  FollowReply response;
   Status status;
   EventRequest.UnpackTo(&request);
   std::vector<std::string> userList = kvstore.Get("caw_users");
   if (!isInList(userList, request.username()) ||
     !isInList(userList, request.to_follow())) {
     status = Status(StatusCode::NOT_FOUND, "You have not provided valid usernames");
+  } else if (request.username() == request.to_follow()) {
+    status = Status(StatusCode::INVALID_ARGUMENT, "You cannot follow yourself");
+  } else if (isInList(kvstore.Get("caw_user_" + request.username() + "_following"),
+    request.to_follow())) {
+    status = Status(StatusCode::INVALID_ARGUMENT, "You are already following the user");
   } else {
     kvstore.Put("caw_user_" + request.username() + "_following", request.to_follow());
     kvstore.Put("caw_user_" + request.to_follow() + "_followers", request.username());
@@ -189,7 +207,14 @@ Status GetProfile(Any& EventRequest, Any& EventReply, KeyValueStoreInterface& kv
   } else {
     std::vector<std::string>> followers = kvstore.Get("caw_user_" + request.username() + "_followers");
     std::vector<std::string>> following = kvstore.Get("caw_user_" + request.username() + "_following");
-    // TODO: FIGURE OUT HOW TO WRITE TO RESPONSE
+
+    for (std::string followsMe : followers) {
+      response.add_followers(followsMe);
+    }
+    for (std::string iFollow : following) {
+      response.add_following(iFollow);
+    }
+
     status = Status::OK;
   }
   EventReply.PackFrom(response);
