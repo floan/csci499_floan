@@ -28,19 +28,28 @@ using caw::RegisteruserRequest;
 using caw::Timestamp;
 
 // Helper functions
+// This function checks to see if a string is in a list
 bool isInList(std::vector<std::string> list, std::string key);
+// This function converts a space seperated string to a list
 std::vector<std::string> stringToVector(std::string strToConvert);
+// This function sets caw attributes
 void makeCawFromId(Caw *caw, std::string caw_id,
                    KeyValueStoreInterface &kvstore);
 
 // Functions to be passed into Faz
+// This function registers a user
 Status RegisterUser(Any &EventRequest, Any &EventReply,
                     KeyValueStoreInterface &kvstore);
+// This function posts a caw to the kvstore
 Status PostCaw(Any &EventRequest, Any &EventReply,
                KeyValueStoreInterface &kvstore);
+// This function returns a caw from the kvstore
 Status ReadCaw(Any &EventRequest, Any &EventReply,
                KeyValueStoreInterface &kvstore);
+// This function makes one user follow another
 Status FollowUser(Any &EventRequest, Any &EventReply,
                   KeyValueStoreInterface &kvstore);
+// This function gets the followers & following
+// of a user
 Status GetProfile(Any &EventRequest, Any &EventReply,
                   KeyValueStoreInterface &kvstore);

@@ -69,6 +69,7 @@ Status PostCaw(Any &EventRequest, Any &EventReply,
                KeyValueStoreInterface &kvstore) {
   CawRequest request;
   CawReply response;
+  Caw toReturn;
   EventRequest.UnpackTo(&request);
   std::vector<std::string> userList = kvstore.Get("caw_users");
   std::vector<std::string> all_caws = kvstore.Get("all_caws");
@@ -82,8 +83,13 @@ Status PostCaw(Any &EventRequest, Any &EventReply,
         Status(StatusCode::NOT_FOUND, "The provided parent_id does not exist.");
   } else {
     // Grab the latest id and increment
-    std::string currentCawId =
-        std::to_string(std::stoi(all_caws[all_caws.size() - 1]) + 1);
+    std::string currentCawId;
+    if (all_caws.size() > 0) {
+      currentCawId =
+          std::to_string(std::stoi(all_caws[all_caws.size() - 1]) + 1);
+    } else {
+      currentCawId = "1";
+    }
     std::string username = request.username();
     std::string text = request.text();
     std::string parent_id = request.parent_id();
@@ -120,6 +126,9 @@ Status PostCaw(Any &EventRequest, Any &EventReply,
       kvstore.Put("caw_" + currentCawId, data);
     }
 
+    // We will return this caw
+    makeCawFromId(&toReturn, currentCawId, kvstore);
+
     // If the parent is present we want to
     // include current caw in parent's childrens
     if (parent_id != "") {
@@ -132,9 +141,10 @@ Status PostCaw(Any &EventRequest, Any &EventReply,
         kvstore.Put("caw_" + parent_id, data);
       }
     }
-
+    response.set_allocated_caw(&toReturn);
     status = Status::OK;
   }
+  EventReply.PackFrom(response);
   return status;
 }
 
