@@ -11,27 +11,45 @@ using grpc::ServerReaderWriter;
 using grpc::Status;
 using grpc::StatusCode;
 
-using kvstore::PutRequest;
-using kvstore::PutReply;
-using kvstore::GetRequest;
 using kvstore::GetReply;
-using kvstore::RemoveRequest;
+using kvstore::GetRequest;
+using kvstore::PutReply;
+using kvstore::PutRequest;
 using kvstore::RemoveReply;
+using kvstore::RemoveRequest;
 
-class KeyValueStoreImpl final :
-public kvstore::KeyValueStore::Service {
- public:
+// This class implements the server side
+// functionality of the key value store
+class KeyValueStoreImpl final : public kvstore::KeyValueStore::Service {
+public:
+  KeyValueStoreImpl() : store_(){};
+  // This function performs normal put functionality
+  // by unwrapping protobuf messages
+  // Args: Context (for additional grpc info),
+  //       PutRequest Protobuf Message containing key, value
+  //       PutReply Protobuf Message, Empty
+  // Returns: GRPC Status indicating success/error
+  Status put(ServerContext *context, const PutRequest *request,
+             PutReply *response) override;
+  // This function performs normal get functionality
+  // by unwrapping protobuf messages
+  // Args: Context (for additional grpc info),
+  //       GetRequest Protobuf Message containing key
+  //       GetReply Protobuf Message that will be
+  //       Populated with corresponding value
+  // Returns: GRPC Status indicating success/error
+  Status get(ServerContext *context,
+             ServerReaderWriter<GetReply, GetRequest> *stream) override;
+  // This function performs normal remove functionality
+  // by unwrapping protobuf messages
+  // Args: Context (for additional grpc info),
+  //       RemoveRequest Protobuf Message containing key
+  //       RemoveReply Protobuf Message, Empty
+  // Returns: GRPC Status indicating success/error
+  Status remove(ServerContext *context, const RemoveRequest *request,
+                RemoveReply *response) override;
 
-  KeyValueStoreImpl() : store_() {};
-
-  Status put(ServerContext* context, 
-    const PutRequest* request, PutReply* response) override;
-  Status get(ServerContext* context,
-    ServerReaderWriter<GetReply, GetRequest>* stream) override;
-  Status remove(ServerContext* context,
-    const RemoveRequest* request, RemoveReply* response) override;
-
- private:
+private:
   // Local variable from core class
-  KeyValueStore store_; 
+  KeyValueStore store_;
 };

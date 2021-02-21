@@ -9,7 +9,7 @@
 #include <sys/time.h>
 #include <vector>
 
-bool isInList(std::vector<std::string> list, std::string key) {
+bool isInList(const std::vector<std::string>& list, const std::string& key) {
   for (std::string s : list) {
     if (s == key) {
       return true;
@@ -18,7 +18,7 @@ bool isInList(std::vector<std::string> list, std::string key) {
   return false;
 }
 
-std::vector<std::string> stringToVector(std::string strToConvert) {
+std::vector<std::string> stringToVector(const std::string& strToConvert) {
   std::stringstream ss(strToConvert);
   std::vector<std::string> toReturn;
   std::string word;
@@ -28,8 +28,8 @@ std::vector<std::string> stringToVector(std::string strToConvert) {
   return toReturn;
 }
 
-void makeCawFromId(Caw *caw, std::string caw_id,
-                   KeyValueStoreInterface &kvstore) {
+void makeCawFromId(const Caw *caw, const std::string& caw_id,
+                   const KeyValueStoreInterface &kvstore) {
   std::vector<std::string> currentCaw;
   Timestamp *timestamp = new Timestamp;
   std::vector<std::string> timestamps;
@@ -47,8 +47,8 @@ void makeCawFromId(Caw *caw, std::string caw_id,
   caw->set_allocated_timestamp(timestamp);
 }
 
-Status RegisterUser(Any &EventRequest, Any &EventReply,
-                    KeyValueStoreInterface &kvstore) {
+Status RegisterUser(const Any &EventRequest, const Any &EventReply,
+                    const KeyValueStoreInterface &kvstore) {
   RegisteruserRequest request;
   RegisteruserReply response;
   EventRequest.UnpackTo(&request);
@@ -65,8 +65,8 @@ Status RegisterUser(Any &EventRequest, Any &EventReply,
   return status;
 }
 
-Status PostCaw(Any &EventRequest, Any &EventReply,
-               KeyValueStoreInterface &kvstore) {
+Status PostCaw(const Any &EventRequest, const Any &EventReply,
+               const KeyValueStoreInterface &kvstore) {
   CawRequest request;
   CawReply response;
   EventRequest.UnpackTo(&request);
@@ -151,8 +151,8 @@ Status PostCaw(Any &EventRequest, Any &EventReply,
 
 // This function gets the main caw and all its subthreads
 // it does not get subthreads of its subthreads (1 level bfs, not dfs)
-Status ReadCaw(Any &EventRequest, Any &EventReply,
-               KeyValueStoreInterface &kvstore) {
+Status ReadCaw(const Any &EventRequest, const Any &EventReply,
+               const KeyValueStoreInterface &kvstore) {
   ReadRequest request;
   ReadReply response;
   Status status;
@@ -189,8 +189,8 @@ Status ReadCaw(Any &EventRequest, Any &EventReply,
   return status;
 }
 
-Status FollowUser(Any &EventRequest, Any &EventReply,
-                  KeyValueStoreInterface &kvstore) {
+Status FollowUser(const Any &EventRequest, const Any &EventReply,
+                  const KeyValueStoreInterface &kvstore) {
   FollowRequest request;
   FollowReply response;
   Status status;
@@ -217,8 +217,8 @@ Status FollowUser(Any &EventRequest, Any &EventReply,
   return status;
 }
 
-Status GetProfile(Any &EventRequest, Any &EventReply,
-                  KeyValueStoreInterface &kvstore) {
+Status GetProfile(const Any &EventRequest, const Any &EventReply,
+                  const KeyValueStoreInterface &kvstore) {
   ProfileRequest request;
   ProfileReply response;
   Status status;
