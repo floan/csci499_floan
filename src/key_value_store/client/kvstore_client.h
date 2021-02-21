@@ -25,15 +25,22 @@ using kvstore::RemoveRequest;
 // grpc and process the result to cpp syntax output
 class KeyValueStoreClient final : public KeyValueStoreInterface {
 public:
-  KeyValueStoreClient(std::shared_ptr<Channel> channel)
+  // This is a constructor that takes in a channel instance
+  // This channel is used to connect to the backend
+  KeyValueStoreClient(const std::shared_ptr<Channel> &channel)
       : stub_(Greeter::NewStub(channel)){};
   // Performs normal put functionality
-  bool Put(std::string key, std::string value);
+  // Args: Key, Value pair to store in kvstore
+  // Returns: boolean indicating success/failure
+  bool Put(const ::string &key, const std::string &value);
   // Performs normal Get functionality
-  // returns empty if key does not exist
-  std::vector<std::string> Get(std::string key);
+  // Args: Key to search the kvstore
+  // Returns: Value list, empty if key is nonexistent
+  std::vector<std::string> Get(const std::string &key);
   // Performs normal remove functionality
-  bool Remove(std::string key);
+  // Args: Key to remove from kvstore
+  // Returns: boolean indicating success/failure
+  bool Remove(const std::string &key);
 
 private:
   // A connection to our grpc server

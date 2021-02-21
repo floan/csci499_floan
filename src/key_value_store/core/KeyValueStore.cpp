@@ -8,7 +8,7 @@
 // Alias for the unorderedList
 typedef std::unordered_map<std::string, std::vector<std::string>> hashMap;
 
-bool KeyValueStore::Put(std::string key, std::string value) {
+bool KeyValueStore::Put(const std::string &key, const std::string &value) {
   bool result;
   const std::lock_guard<std::mutex> lock(lock_);
   // If this key already exists in the store
@@ -23,7 +23,7 @@ bool KeyValueStore::Put(std::string key, std::string value) {
   return result;
 }
 
-std::vector<std::string> KeyValueStore::Get(std::string key) {
+std::vector<std::string> KeyValueStore::Get(const std::string &key) {
   std::vector<std::string> result;
   const std::lock_guard<std::mutex> lock(lock_);
   if (kv_store_.find(key) == kv_store_.end()) {
@@ -34,7 +34,7 @@ std::vector<std::string> KeyValueStore::Get(std::string key) {
   return result;
 }
 
-bool KeyValueStore::Remove(std::string key) {
+bool KeyValueStore::Remove(const std::string &key) {
   size_t result; // Returns 1 or 0
   const std::lock_guard<std::mutex> lock(lock_);
   result = kv_store_.erase(key);

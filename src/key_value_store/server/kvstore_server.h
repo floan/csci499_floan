@@ -25,14 +25,27 @@ public:
   KeyValueStoreImpl() : store_(){};
   // This function performs normal put functionality
   // by unwrapping protobuf messages
+  // Args: Context (for additional grpc info),
+  //       PutRequest Protobuf Message containing key, value
+  //       PutReply Protobuf Message, Empty
+  // Returns: GRPC Status indicating success/error
   Status put(ServerContext *context, const PutRequest *request,
              PutReply *response) override;
   // This function performs normal get functionality
   // by unwrapping protobuf messages
+  // Args: Context (for additional grpc info),
+  //       GetRequest Protobuf Message containing key
+  //       GetReply Protobuf Message that will be
+  //       Populated with corresponding value
+  // Returns: GRPC Status indicating success/error
   Status get(ServerContext *context,
              ServerReaderWriter<GetReply, GetRequest> *stream) override;
   // This function performs normal remove functionality
   // by unwrapping protobuf messages
+  // Args: Context (for additional grpc info),
+  //       RemoveRequest Protobuf Message containing key
+  //       RemoveReply Protobuf Message, Empty
+  // Returns: GRPC Status indicating success/error
   Status remove(ServerContext *context, const RemoveRequest *request,
                 RemoveReply *response) override;
 

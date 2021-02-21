@@ -16,12 +16,17 @@ public:
   KeyValueStore(){};
   ~KeyValueStore(){};
   // Performs normal Put functionality
-  bool Put(std::string key, std::string value);
+  // Args: Key, value pair to store in kvstore
+  // Returns: boolean indicating success/failure
+  bool Put(const std::string &key, const std::string &value);
   // Performs normal Get functionality
-  // returns empty if key does not exist
-  std::vector<std::string> Get(std::string key);
+  // Args: Key to search the kvstore
+  // Returns: Value list, empty if key is nonexistent
+  std::vector<std::string> Get(const std::string &key);
   // Performs normal remove functionality
-  bool Remove(std::string key);
+  // Args: Key to remove from kvstore
+  // Returns: boolean indicating success/failure
+  bool Remove(const std::string &key);
 
 private:
   // This is the underlying data structure
