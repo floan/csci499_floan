@@ -32,7 +32,7 @@ public:
   // Performs normal put functionality
   // Args: Key, Value pair to store in kvstore
   // Returns: boolean indicating success/failure
-  bool Put(const ::string &key, const std::string &value);
+  bool Put(const std::string &key, const std::string &value);
   // Performs normal Get functionality
   // Args: Key to search the kvstore
   // Returns: Value list, empty if key is nonexistent
