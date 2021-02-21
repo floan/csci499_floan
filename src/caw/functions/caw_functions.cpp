@@ -9,7 +9,7 @@
 #include <sys/time.h>
 #include <vector>
 
-bool isInList(const std::vector<std::string>& list, const std::string& key) {
+bool isInList(const std::vector<std::string> &list, const std::string &key) {
   for (std::string s : list) {
     if (s == key) {
       return true;
@@ -18,7 +18,7 @@ bool isInList(const std::vector<std::string>& list, const std::string& key) {
   return false;
 }
 
-std::vector<std::string> stringToVector(const std::string& strToConvert) {
+std::vector<std::string> stringToVector(const std::string &strToConvert) {
   std::stringstream ss(strToConvert);
   std::vector<std::string> toReturn;
   std::string word;
@@ -28,8 +28,8 @@ std::vector<std::string> stringToVector(const std::string& strToConvert) {
   return toReturn;
 }
 
-void makeCawFromId(const Caw *caw, const std::string& caw_id,
-                   const KeyValueStoreInterface &kvstore) {
+void makeCawFromId(Caw *caw, const std::string &caw_id,
+                   KeyValueStoreInterface &kvstore) {
   std::vector<std::string> currentCaw;
   Timestamp *timestamp = new Timestamp;
   std::vector<std::string> timestamps;
@@ -47,8 +47,8 @@ void makeCawFromId(const Caw *caw, const std::string& caw_id,
   caw->set_allocated_timestamp(timestamp);
 }
 
-Status RegisterUser(const Any &EventRequest, const Any &EventReply,
-                    const KeyValueStoreInterface &kvstore) {
+Status RegisterUser(const Any &EventRequest, Any &EventReply,
+                    KeyValueStoreInterface &kvstore) {
   RegisteruserRequest request;
   RegisteruserReply response;
   EventRequest.UnpackTo(&request);
@@ -65,8 +65,8 @@ Status RegisterUser(const Any &EventRequest, const Any &EventReply,
   return status;
 }
 
-Status PostCaw(const Any &EventRequest, const Any &EventReply,
-               const KeyValueStoreInterface &kvstore) {
+Status PostCaw(const Any &EventRequest, Any &EventReply,
+               KeyValueStoreInterface &kvstore) {
   CawRequest request;
   CawReply response;
   EventRequest.UnpackTo(&request);
@@ -151,8 +151,8 @@ Status PostCaw(const Any &EventRequest, const Any &EventReply,
 
 // This function gets the main caw and all its subthreads
 // it does not get subthreads of its subthreads (1 level bfs, not dfs)
-Status ReadCaw(const Any &EventRequest, const Any &EventReply,
-               const KeyValueStoreInterface &kvstore) {
+Status ReadCaw(const Any &EventRequest, Any &EventReply,
+               KeyValueStoreInterface &kvstore) {
   ReadRequest request;
   ReadReply response;
   Status status;
@@ -177,7 +177,7 @@ Status ReadCaw(const Any &EventRequest, const Any &EventReply,
     childrenCawString = currentCaw[4];
     childrenCaws = stringToVector(childrenCawString);
     // repeat process for children
-    for (std::string id : childrenCaws) {
+    for (const std::string &id : childrenCaws) {
       // Add all the children caws to the reply stream
       addCawsToResponse = response.add_caws();
       makeCawFromId(addCawsToResponse, id, kvstore);
@@ -189,8 +189,8 @@ Status ReadCaw(const Any &EventRequest, const Any &EventReply,
   return status;
 }
 
-Status FollowUser(const Any &EventRequest, const Any &EventReply,
-                  const KeyValueStoreInterface &kvstore) {
+Status FollowUser(const Any &EventRequest, Any &EventReply,
+                  KeyValueStoreInterface &kvstore) {
   FollowRequest request;
   FollowReply response;
   Status status;
@@ -217,8 +217,8 @@ Status FollowUser(const Any &EventRequest, const Any &EventReply,
   return status;
 }
 
-Status GetProfile(const Any &EventRequest, const Any &EventReply,
-                  const KeyValueStoreInterface &kvstore) {
+Status GetProfile(const Any &EventRequest, Any &EventReply,
+                  KeyValueStoreInterface &kvstore) {
   ProfileRequest request;
   ProfileReply response;
   Status status;
@@ -232,10 +232,10 @@ Status GetProfile(const Any &EventRequest, const Any &EventReply,
     std::vector<std::string> following =
         kvstore.Get("caw_user_" + request.username() + "_following");
 
-    for (std::string followsMe : followers) {
+    for (const std::string &followsMe : followers) {
       response.add_followers(followsMe);
     }
-    for (std::string iFollow : following) {
+    for (const std::string &iFollow : following) {
       response.add_following(iFollow);
     }
 
