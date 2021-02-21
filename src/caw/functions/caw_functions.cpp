@@ -31,7 +31,7 @@ std::vector<std::string> stringToVector(std::string strToConvert) {
 void makeCawFromId(Caw *caw, std::string caw_id,
                    KeyValueStoreInterface &kvstore) {
   std::vector<std::string> currentCaw;
-  Timestamp timestamp;
+  Timestamp *timestamp = new Timestamp;
   std::vector<std::string> timestamps;
 
   currentCaw = kvstore.Get("caw_" + caw_id);
@@ -42,9 +42,9 @@ void makeCawFromId(Caw *caw, std::string caw_id,
   caw->set_parent_id(currentCaw[2]);
   // Construct the timestamp and set it
   timestamps = stringToVector(currentCaw[3]);
-  timestamp.set_seconds(std::stol(timestamps[0]));
-  timestamp.set_useconds(std::stol(timestamps[1]));
-  caw->set_allocated_timestamp(&timestamp);
+  timestamp->set_seconds(std::stol(timestamps[0]));
+  timestamp->set_useconds(std::stol(timestamps[1]));
+  caw->set_allocated_timestamp(timestamp);
 }
 
 Status RegisterUser(Any &EventRequest, Any &EventReply,
@@ -69,7 +69,6 @@ Status PostCaw(Any &EventRequest, Any &EventReply,
                KeyValueStoreInterface &kvstore) {
   CawRequest request;
   CawReply response;
-  Caw toReturn;
   EventRequest.UnpackTo(&request);
   std::vector<std::string> userList = kvstore.Get("caw_users");
   std::vector<std::string> all_caws = kvstore.Get("all_caws");
@@ -126,9 +125,6 @@ Status PostCaw(Any &EventRequest, Any &EventReply,
       kvstore.Put("caw_" + currentCawId, data);
     }
 
-    // We will return this caw
-    makeCawFromId(&toReturn, currentCawId, kvstore);
-
     // If the parent is present we want to
     // include current caw in parent's childrens
     if (parent_id != "") {
@@ -141,7 +137,12 @@ Status PostCaw(Any &EventRequest, Any &EventReply,
         kvstore.Put("caw_" + parent_id, data);
       }
     }
-    response.set_allocated_caw(&toReturn);
+
+    // We will return this caw
+    Caw *toReturn = new Caw;
+    makeCawFromId(toReturn, currentCawId, kvstore);
+
+    response.set_allocated_caw(toReturn);
     status = Status::OK;
   }
   EventReply.PackFrom(response);

@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "../../key_value_store/KeyValueStoreInterface.h"
+#include <glog/logging.h>
 
 using google::protobuf::Any;
 using grpc::Channel;

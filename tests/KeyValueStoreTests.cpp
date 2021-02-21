@@ -6,7 +6,7 @@
 
 #include "gtest/gtest.h"
 
-// This is a basic test to ensure the 
+// This is a basic test to ensure the
 // store actually stores in key/value pairs
 TEST(KeyValueStoreTest, basic_put_pass) {
   KeyValueStore test_store;
@@ -21,7 +21,7 @@ TEST(KeyValueStoreTest, basic_get_hasResult) {
   EXPECT_EQ("sayHello", test_store.Get("func1")[0]);
 }
 
-// Checks to ensure the function returns 
+// Checks to ensure the function returns
 // an empty vector when key is not found
 TEST(KeyValueStoreTest, basic_get_hasNoResult) {
   KeyValueStore test_store;
@@ -37,14 +37,14 @@ TEST(KeyValueStoreTest, basic_remove_pass) {
   EXPECT_EQ(0, test_store.Get("func1").size());
 }
 
-// Returns false when key doesn't exist 
-// on a Remove(key) call 
+// Returns false when key doesn't exist
+// on a Remove(key) call
 TEST(KeyValueStoreTest, basic_remove_fail) {
   KeyValueStore test_store;
   EXPECT_EQ(false, test_store.Remove("func1"));
 }
 
-// Makes sure Remove(key) removes the entire 
+// Makes sure Remove(key) removes the entire
 // Value list instead of just one value
 TEST(KeyValueStoreTest, remove_entire_mapping) {
   KeyValueStore test_store;
@@ -57,7 +57,7 @@ TEST(KeyValueStoreTest, remove_entire_mapping) {
   EXPECT_EQ(false, test_store.Remove("func1"));
 }
 
-int main(int argc, char** argv) {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+int main(int argc, char **argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }
