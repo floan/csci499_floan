@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <iostream>
 
 #include <glog/logging.h>
 
@@ -47,26 +48,26 @@ public:
   // Returns: bool to indicate success / failure
   bool RegisterUser(const std::string& username);
   // Creates and saves a caw "post" in the kvstore
+  // This also performs the reply functionality
+  // when given a parent id
   // Args: posters username and text to post
   // Returns: bool to indicate success / failure
-  bool PostCaw(const std::string& username, const std::string& text);
-  // Creates and saves a caw "reply" in the kvstore
-  // Args: posters username, text to post and id of caw to reply to
-  // Returns: bool to indicate success / failure
-  bool ReplyToCaw(const std::string& username, const std::string& text, int parent_id);
+  bool PostCaw(const std::string& username, const std::string& text, int parent_id);
   // Follows a user
   // Args: username of person following and username of person
   //       to follow
   // Returns: bool to indicate success / failure
   bool FollowUser(const std::string& username, const std::string& to_follow);
   // Gets an entire caw thread from the database
+  // and prints it out in a readable format
   // Args: Id of the caw whose sub thread user wants 
   // Returns: a string of the caw threads
-  std::vector<std::string> ReadCaw(int caw_id);
+  bool ReadCaw(int caw_id);
   // Gets a users following and follower lists 
+  // and prints them out in readable formats
   // Args: username of user whose lists we want
   // Returns: a vector of two vectors, followers and following
-  std::vector<std::vector<std::string>> GetProfile(const std::string& username);
+  bool GetProfile(const std::string& username);
 
 private:
   // A connection to the Faz Server
