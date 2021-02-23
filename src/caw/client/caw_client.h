@@ -26,12 +26,17 @@ using caw::RegisteruserReply;
 using caw::RegisteruserRequest;
 using caw::Timestamp;
 
+// This class functions as a bridge 
+// between the caw cli tool that the 
+// user uses and our faz server that runs 
+// our functions. 
 class CawClient final {
 public:
-  // Initialize to set up and connect Faz client
-  CawClient();
+  // Initialize to set up and connect Faz Server
+  CawClient(const std::shared_ptr<Channel> &channel)
+    : stub_(Greeter::NewStub(channel)){};
 
-  // Calls the Faz client to perform the
+  // Calls the Faz server to perform the
   // Following operations
 
   // Registers the user in the kvstore database
@@ -61,5 +66,6 @@ public:
   std::vector<std::vector<std::string>> GetProfile(const std::string& username);
 
 private:
-  // An instance of the Faz Client
+  // A connection to the Faz Server
+  std::unique_ptr<faz::FazService::Stub> stub_;
 };
