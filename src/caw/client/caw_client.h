@@ -1,11 +1,15 @@
 #include "caw.pb.h"
+#include "faz.grpc.pb.h"
 #include <google/protobuf/any.pb.h>
 #include <grpcpp/grpcpp.h>
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include <glog/logging.h>
+
+#include "../../faz/"
 
 using google::protobuf::Any;
 using grpc::Channel;
@@ -33,8 +37,7 @@ using caw::Timestamp;
 class CawClient final {
 public:
   // Initialize to set up and connect Faz Server
-  CawClient(const std::shared_ptr<Channel> &channel)
-    : stub_(Greeter::NewStub(channel)){};
+  CawClient(const std::shared_ptr<Channel> &channel);
 
   // Calls the Faz server to perform the
   // Following operations
@@ -68,4 +71,6 @@ public:
 private:
   // A connection to the Faz Server
   std::unique_ptr<faz::FazService::Stub> stub_;
+  // A map linking functionName with eventType
+  std::unordered_map<std::string, int> functionToEventType_;
 };
