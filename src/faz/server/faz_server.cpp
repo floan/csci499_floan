@@ -58,8 +58,8 @@ Status FazServiceImpl::event(ServerContext *context,
     // Now we will call the function using the stored
     // caw functions. Functions will modify data inside
     // the Any objects.
-    status = caw_functions_[functionName](request->payload(),
-                                          response->payload(), kvstore_);
+    status = caw_functions_[functionName](
+        request->mutable_payload(), response->mutable_payload(), kvstore_);
   }
   return status;
 }
