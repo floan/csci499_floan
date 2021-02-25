@@ -13,11 +13,11 @@ KeyValueStoreInterface &kvstore = store;
 // a user properly
 TEST(RegisterUserTest, basic_register_user) {
   Any EventRequest;
-  Any EventReply;
+  Any* EventReply = new Any();
   RegisteruserRequest request;
   request.set_username("Fayez");
   EventRequest.PackFrom(request);
-  Status status = RegisterUser(EventRequest, EventReply, kvstore);
+  Status status = RegisterUser(EventRequest, *EventReply, kvstore);
   EXPECT_EQ(kvstore.Get("caw_users")[0], "Fayez");
   EXPECT_EQ(status.error_code(), 0);
 }
@@ -26,13 +26,13 @@ TEST(RegisterUserTest, basic_register_user) {
 // multiple users properly
 TEST(RegisterUserTest, register_multiple_users) {
   Any EventRequest;
-  Any EventReply;
+  Any* EventReply = new Any();
   RegisteruserRequest request;
   // First user pre-registered from first test
   // Registering second user
   request.set_username("Loan");
   EventRequest.PackFrom(request);
-  Status status = RegisterUser(EventRequest, EventReply, kvstore);
+  Status status = RegisterUser(EventRequest, *EventReply, kvstore);
   EXPECT_EQ(kvstore.Get("caw_users")[0], "Fayez");
   EXPECT_EQ(kvstore.Get("caw_users")[1], "Loan");
 }
@@ -41,11 +41,11 @@ TEST(RegisterUserTest, register_multiple_users) {
 // When the same user is registered
 TEST(RegisterUserTest, register_same_user) {
   Any EventRequest;
-  Any EventReply;
+  Any* EventReply = new Any();
   RegisteruserRequest request;
   request.set_username("Fayez");
   EventRequest.PackFrom(request);
-  Status status = RegisterUser(EventRequest, EventReply, kvstore);
+  Status status = RegisterUser(EventRequest, *EventReply, kvstore);
   EXPECT_EQ(status.error_code(), 6);
 }
 
