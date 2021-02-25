@@ -52,14 +52,14 @@ TEST(RegisterUserTest, register_same_user) {
 // Basic test to check post functionality
 TEST(PostCawTest, basic_post_caw) {
   Any EventRequest;
-  Any EventReply;
+  Any* EventReply = new Any();
   CawRequest request;
   CawReply response;
   request.set_username("Fayez");
   request.set_text("This is my first Caw");
   EventRequest.PackFrom(request);
-  Status status = PostCaw(EventRequest, EventReply, kvstore);
-  EventReply.UnpackTo(&response);
+  Status status = PostCaw(EventRequest, *EventReply, kvstore);
+  EventReply->UnpackTo(&response);
   Caw caw = response.caw();
   EXPECT_EQ(status.error_code(), 0);
   EXPECT_EQ(caw.username(), "Fayez");
@@ -71,15 +71,15 @@ TEST(PostCawTest, basic_post_caw) {
 // included as parents children
 TEST(PostCawTest, post_child_caw) {
   Any EventRequest;
-  Any EventReply;
+  Any* EventReply = new Any();
   CawRequest request;
   CawReply response;
   request.set_username("Fayez");
   request.set_text("This is my second Caw");
   request.set_parent_id("1");
   EventRequest.PackFrom(request);
-  Status status = PostCaw(EventRequest, EventReply, kvstore);
-  EventReply.UnpackTo(&response);
+  Status status = PostCaw(EventRequest, *EventReply, kvstore);
+  EventReply->UnpackTo(&response);
   Caw caw = response.caw();
   EXPECT_EQ(status.error_code(), 0);
   EXPECT_EQ(caw.username(), "Fayez");
@@ -92,7 +92,7 @@ TEST(PostCawTest, post_child_caw) {
 // This works as the reply function
 TEST(PostCawTest, post_child_caws) {
   Any EventRequest;
-  Any EventReply;
+  Any* EventReply = new Any();
   CawRequest request;
   CawReply response;
   Status status;
@@ -100,32 +100,32 @@ TEST(PostCawTest, post_child_caws) {
   request.set_text("This is my third Caw");
   request.set_parent_id("1");
   EventRequest.PackFrom(request);
-  status = PostCaw(EventRequest, EventReply, kvstore);
+  status = PostCaw(EventRequest, *EventReply, kvstore);
   ASSERT_EQ(status.error_code(), 0);
   request.set_username("Fayez");
   request.set_text("This is my fourth Caw");
   request.set_parent_id("1");
   EventRequest.PackFrom(request);
-  status = PostCaw(EventRequest, EventReply, kvstore);
+  status = PostCaw(EventRequest, *EventReply, kvstore);
   ASSERT_EQ(status.error_code(), 0);
   request.set_username("Fayez");
   request.set_text("This is my fifth Caw");
   request.set_parent_id("1");
   EventRequest.PackFrom(request);
-  status = PostCaw(EventRequest, EventReply, kvstore);
+  status = PostCaw(EventRequest, *EventReply, kvstore);
   ASSERT_EQ(status.error_code(), 0);
 }
 
 // Basic test to check read functionality
 TEST(ReadCawTest, basic_read_test) {
   Any EventRequest;
-  Any EventReply;
+  Any* EventReply = new Any();
   ReadRequest request;
   ReadReply response;
   request.set_caw_id("1");
   EventRequest.PackFrom(request);
-  Status status = ReadCaw(EventRequest, EventReply, kvstore);
-  EventReply.UnpackTo(&response);
+  Status status = ReadCaw(EventRequest, *EventReply, kvstore);
+  EventReply->UnpackTo(&response);
   EXPECT_EQ(status.error_code(), 0);
   ASSERT_EQ(response.caws().size(), 5);
   Caw cawOne = response.caws()[0];
@@ -144,13 +144,13 @@ TEST(ReadCawTest, basic_read_test) {
 // given id and not top parent id
 TEST(ReadCawTest, read_a_child) {
   Any EventRequest;
-  Any EventReply;
+  Any* EventReply = new Any();
   ReadRequest request;
   ReadReply response;
   request.set_caw_id("3");
   EventRequest.PackFrom(request);
-  Status status = ReadCaw(EventRequest, EventReply, kvstore);
-  EventReply.UnpackTo(&response);
+  Status status = ReadCaw(EventRequest, *EventReply, kvstore);
+  EventReply->UnpackTo(&response);
   EXPECT_EQ(status.error_code(), 0);
   ASSERT_EQ(response.caws().size(), 1);
   Caw caw = response.caws()[0];
@@ -160,13 +160,13 @@ TEST(ReadCawTest, read_a_child) {
 // Tests the follow user feature
 TEST(FollowUserTest, basic_follow_test) {
   Any EventRequest;
-  Any EventReply;
+  Any* EventReply = new Any();
   FollowRequest request;
   FollowReply response;
   request.set_username("Fayez");
   request.set_to_follow("Loan");
   EventRequest.PackFrom(request);
-  Status status = FollowUser(EventRequest, EventReply, kvstore);
+  Status status = FollowUser(EventRequest, *EventReply, kvstore);
   EXPECT_EQ(status.error_code(), 0);
   EXPECT_EQ(kvstore.Get("caw_user_Fayez_following").size(), 1);
   EXPECT_EQ(kvstore.Get("caw_user_Fayez_following")[0], "Loan");
@@ -179,52 +179,52 @@ TEST(FollowUserTest, basic_follow_test) {
 // Tests following yourself
 TEST(FollowUserTest, follow_yourself_test) {
   Any EventRequest;
-  Any EventReply;
+  Any* EventReply = new Any();
   FollowRequest request;
   FollowReply response;
   request.set_username("Fayez");
   request.set_to_follow("Fayez");
   EventRequest.PackFrom(request);
-  Status status = FollowUser(EventRequest, EventReply, kvstore);
+  Status status = FollowUser(EventRequest, *EventReply, kvstore);
   EXPECT_EQ(status.error_code(), 3);
 }
 
 // Tests following the same person
 TEST(FollowUserTest, follow_same_person_test) {
   Any EventRequest;
-  Any EventReply;
+  Any* EventReply = new Any();
   FollowRequest request;
   FollowReply response;
   request.set_username("Fayez");
   request.set_to_follow("Loan");
   EventRequest.PackFrom(request);
-  Status status = FollowUser(EventRequest, EventReply, kvstore);
+  Status status = FollowUser(EventRequest, *EventReply, kvstore);
   EXPECT_EQ(status.error_code(), 3);
 }
 
 // Tests following someone who does not exist
 TEST(FollowUserTest, follow_imaginary_person) {
   Any EventRequest;
-  Any EventReply;
+  Any* EventReply = new Any();
   FollowRequest request;
   FollowReply response;
   request.set_username("Fayez");
   request.set_to_follow("Fayez Loan");
   EventRequest.PackFrom(request);
-  Status status = FollowUser(EventRequest, EventReply, kvstore);
+  Status status = FollowUser(EventRequest, *EventReply, kvstore);
   EXPECT_EQ(status.error_code(), 5);
 }
 
 // Tests the get profile function
 TEST(GetProfileTest, basic_getprofile_test) {
   Any EventRequest;
-  Any EventReply;
+  Any* EventReply = new Any();
   ProfileRequest request;
   ProfileReply response;
   request.set_username("Fayez");
   EventRequest.PackFrom(request);
-  Status status = GetProfile(EventRequest, EventReply, kvstore);
-  EventReply.UnpackTo(&response);
+  Status status = GetProfile(EventRequest, *EventReply, kvstore);
+  EventReply->UnpackTo(&response);
   EXPECT_EQ(status.error_code(), 0);
   EXPECT_EQ(response.followers().size(), 0);
   EXPECT_EQ(response.following().size(), 1);
@@ -234,7 +234,7 @@ TEST(GetProfileTest, basic_getprofile_test) {
 // Tests get profile with following and followers
 TEST(GetProfileTest, lessBasic_getprofile_test) {
   Any EventRequest;
-  Any EventReply;
+  Any* EventReply = new Any();
   ProfileRequest request;
   ProfileReply response;
   // First we will add some followers
@@ -242,12 +242,12 @@ TEST(GetProfileTest, lessBasic_getprofile_test) {
   frequest.set_username("Loan");
   frequest.set_to_follow("Fayez");
   EventRequest.PackFrom(frequest);
-  Status status = FollowUser(EventRequest, EventReply, kvstore);
+  Status status = FollowUser(EventRequest, *EventReply, kvstore);
   // Now we will get following and followers
   request.set_username("Fayez");
   EventRequest.PackFrom(request);
-  status = GetProfile(EventRequest, EventReply, kvstore);
-  EventReply.UnpackTo(&response);
+  status = GetProfile(EventRequest, *EventReply, kvstore);
+  EventReply->UnpackTo(&response);
   EXPECT_EQ(status.error_code(), 0);
   EXPECT_EQ(response.followers().size(), 1);
   EXPECT_EQ(response.following().size(), 1);
