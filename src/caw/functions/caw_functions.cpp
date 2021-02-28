@@ -9,15 +9,6 @@
 #include <sys/time.h>
 #include <vector>
 
-bool isInList(const std::vector<std::string> &list, const std::string &key) {
-  for (std::string s : list) {
-    if (s == key) {
-      return true;
-    }
-  }
-  return false;
-}
-
 std::vector<std::string> stringToVector(const std::string &strToConvert) {
   std::stringstream ss(strToConvert);
   std::vector<std::string> toReturn;
@@ -28,25 +19,6 @@ std::vector<std::string> stringToVector(const std::string &strToConvert) {
   return toReturn;
 }
 
-void makeCawFromId(Caw *caw, const std::string &caw_id,
-                   KeyValueStoreInterface &kvstore) {
-  std::vector<std::string> currentCaw;
-  Timestamp *timestamp = new Timestamp;
-  std::vector<std::string> timestamps;
-
-  currentCaw = kvstore.Get("caw_" + caw_id);
-
-  caw->set_username(currentCaw[0]);
-  caw->set_text(currentCaw[1]);
-  caw->set_id(caw_id);
-  caw->set_parent_id(currentCaw[2]);
-  // Construct the timestamp and set it
-  timestamps = stringToVector(currentCaw[3]);
-  timestamp->set_seconds(std::stol(timestamps[0]));
-  timestamp->set_useconds(std::stol(timestamps[1]));
-  caw->set_allocated_timestamp(timestamp);
-}
-
 Status RegisterUser(const Any &EventRequest, Any &EventReply,
                     KeyValueStoreInterface &kvstore) {
   RegisteruserRequest request;
@@ -54,7 +26,8 @@ Status RegisterUser(const Any &EventRequest, Any &EventReply,
   EventRequest.UnpackTo(&request);
   std::vector<std::string> userList = kvstore.Get("caw_users");
   Status status;
-  if (isInList(userList, request.username())) {
+  if (std::find(userList.begin(), userList.end(), request.username()) !=
+      userList.end()) {
     status = Status(StatusCode::ALREADY_EXISTS,
                     "The provided username already exists.");
   } else {
@@ -71,28 +44,30 @@ Status PostCaw(const Any &EventRequest, Any &EventReply,
   CawReply response;
   EventRequest.UnpackTo(&request);
   std::vector<std::string> userList = kvstore.Get("caw_users");
-  std::vector<std::string> all_caws = kvstore.Get("all_caws");
   Status status;
-  if (!isInList(userList, request.username())) {
+  if (std::find(userList.begin(), userList.end(), request.username()) ==
+      userList.end()) {
     status =
         Status(StatusCode::NOT_FOUND, "The provided username does not exist.");
   } else if (request.parent_id() != "" &&
-             !isInList(all_caws, request.parent_id())) {
-    status =
-        Status(StatusCode::NOT_FOUND, "The provided parent_id does not exist.");
+             kvstore.Get("caw_" + request.parent_id()).size() == 0) {
+    status = Status(StatusCode::NOT_FOUND,
+                    "The provided parent caw does not exist.");
   } else {
     // Grab the latest id and increment
     std::string currentCawId;
-    if (all_caws.size() > 0) {
-      currentCawId =
-          std::to_string(std::stoi(all_caws[all_caws.size() - 1]) + 1);
-    } else {
+    // If this is the first caw being created
+    if (kvstore.Get("latestCawId").size() == 0) {
       currentCawId = "1";
+      kvstore.Put("latestCawId", currentCawId);
+    } else {
+      // Get last caw id and increment by 1
+      currentCawId =
+          std::to_string(std::stoi(kvstore.Get("latestCawId")[0]) + 1);
+      // Replace previous last caw ID with current one
+      kvstore.Remove("latestCawId");
+      kvstore.Put("latestCawId", currentCawId);
     }
-    std::string username = request.username();
-    std::string text = request.text();
-    std::string parent_id = request.parent_id();
-    std::string timestamp;
 
     auto millisec_since_epoch =
         std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -102,47 +77,33 @@ Status PostCaw(const Any &EventRequest, Any &EventReply,
         std::chrono::duration_cast<std::chrono::seconds>(
             std::chrono::system_clock::now().time_since_epoch())
             .count();
-    timestamp = std::to_string(sec_since_epoch);
-    timestamp += " ";
-    timestamp += std::to_string(millisec_since_epoch);
-    // Now we will begin storing the caw in the kvstore
-    // First we will store the caw id
-    kvstore.Put("all_caws", currentCawId);
-    // Create caw vector
-    std::vector<std::string> currentCaw;
-    // caw_id[0] = username
-    currentCaw.push_back(username);
-    // caw_id[1] = text
-    currentCaw.push_back(text);
-    // caw_id[2] = parent_id;
-    currentCaw.push_back(parent_id);
-    // caw_id[3] = timestamp;
-    currentCaw.push_back(timestamp);
-    // caw_id[4] = children;
-    currentCaw.push_back("");
 
-    for (const std::string &data : currentCaw) {
-      kvstore.Put("caw_" + currentCawId, data);
-    }
+    Timestamp *timestamp = new Timestamp;
+    timestamp->set_seconds(sec_since_epoch);
+    timestamp->set_useconds(millisec_since_epoch);
+
+    Caw *currentCaw = new Caw;
+    currentCaw->set_username(request.username());
+    currentCaw->set_text(request.text());
+    currentCaw->set_parent_id(request.parent_id());
+    currentCaw->set_allocated_timestamp(timestamp);
+    currentCaw->set_id(currentCawId);
+
+    std::string currentCawString;
+    currentCaw->SerializeToString(&currentCawString);
+
+    // caw_id[0] = caw
+    // caw_id_children = {children vector}
+    kvstore.Put("caw_" + currentCawId, currentCawString);
 
     // If the parent is present we want to
     // include current caw in parent's childrens
-    if (parent_id != "") {
-      std::vector<std::string> parent_caw;
-      parent_caw = kvstore.Get("caw_" + parent_id);
-      kvstore.Remove("caw_" + parent_id);
-      // Updating and inserting
-      parent_caw[4] += (currentCawId + " ");
-      for (const std::string &data : parent_caw) {
-        kvstore.Put("caw_" + parent_id, data);
-      }
+    if (request.parent_id() != "") {
+      kvstore.Put("caw_" + request.parent_id() + "_children", currentCawId);
     }
 
     // We will return this caw
-    Caw *toReturn = new Caw;
-    makeCawFromId(toReturn, currentCawId, kvstore);
-
-    response.set_allocated_caw(toReturn);
+    response.set_allocated_caw(currentCaw);
     status = Status::OK;
   }
   EventReply.PackFrom(response);
@@ -158,29 +119,22 @@ Status ReadCaw(const Any &EventRequest, Any &EventReply,
   Status status;
   EventRequest.UnpackTo(&request);
   std::string caw_id = request.caw_id();
-  std::vector<std::string> all_caws = kvstore.Get("all_caws");
-
-  if (!isInList(all_caws, caw_id)) {
+  if (kvstore.Get("caw_" + caw_id).size() == 0) {
     status = Status(StatusCode::NOT_FOUND, "The provided caw does not exist.");
   } else {
-    // We will perform a level one bfs traversal
-    // To get child threads
-    std::vector<std::string> currentCaw;
-    std::string childrenCawString;
-    std::vector<std::string> childrenCaws;
-
-    currentCaw = kvstore.Get("caw_" + caw_id);
-
+    std::string currentCawString = kvstore.Get("caw_" + caw_id)[0];
     // Add this caw to the reply stream
     Caw *addCawsToResponse = response.add_caws();
-    makeCawFromId(addCawsToResponse, caw_id, kvstore);
-    childrenCawString = currentCaw[4];
-    childrenCaws = stringToVector(childrenCawString);
+    addCawsToResponse->ParseFromString(currentCawString);
+    std::vector<std::string> childrenCaws =
+        kvstore.Get("caw_" + caw_id + "_children");
+
     // repeat process for children
     for (const std::string &id : childrenCaws) {
       // Add all the children caws to the reply stream
+      currentCawString = kvstore.Get("caw_" + id)[0];
       addCawsToResponse = response.add_caws();
-      makeCawFromId(addCawsToResponse, id, kvstore);
+      addCawsToResponse->ParseFromString(currentCawString);
     }
     status = Status::OK;
   }
@@ -196,15 +150,22 @@ Status FollowUser(const Any &EventRequest, Any &EventReply,
   Status status;
   EventRequest.UnpackTo(&request);
   std::vector<std::string> userList = kvstore.Get("caw_users");
-  if (!isInList(userList, request.username()) ||
-      !isInList(userList, request.to_follow())) {
+  if (std::find(userList.begin(), userList.end(), request.username()) ==
+          userList.end() ||
+      std::find(userList.begin(), userList.end(), request.to_follow()) ==
+          userList.end()) {
     status =
         Status(StatusCode::NOT_FOUND, "You have not provided valid usernames");
   } else if (request.username() == request.to_follow()) {
     status = Status(StatusCode::INVALID_ARGUMENT, "You cannot follow yourself");
-  } else if (isInList(
-                 kvstore.Get("caw_user_" + request.username() + "_following"),
-                 request.to_follow())) {
+  } else if (std::find(
+                 kvstore.Get("caw_user_" + request.username() + "_following")
+                     .begin(),
+                 kvstore.Get("caw_user_" + request.username() + "_following")
+                     .end(),
+                 request.to_follow()) !=
+             kvstore.Get("caw_user_" + request.username() + "_following")
+                 .end()) {
     status = Status(StatusCode::INVALID_ARGUMENT,
                     "You are already following the user");
   } else {
@@ -224,7 +185,8 @@ Status GetProfile(const Any &EventRequest, Any &EventReply,
   Status status;
   EventRequest.UnpackTo(&request);
   std::vector<std::string> userList = kvstore.Get("caw_users");
-  if (!isInList(userList, request.username())) {
+  if (std::find(userList.begin(), userList.end(), request.username()) ==
+      userList.end()) {
     status = Status(StatusCode::NOT_FOUND, "Username does not exsist");
   } else {
     std::vector<std::string> followers =

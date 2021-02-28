@@ -28,23 +28,6 @@ using caw::RegisteruserReply;
 using caw::RegisteruserRequest;
 using caw::Timestamp;
 
-// Helper functions
-// This function checks to see if a string is in a list
-// Args: List to check from and key to find in list
-// Returns: bool indicating whether key is present or not
-bool isInList(const std::vector<std::string> &list, const std::string &key);
-// This function converts a space seperated string to a list
-// Args: The string to convert into a list
-// Returns: List of sub-strings
-std::vector<std::string> stringToVector(const std::string &strToConvert);
-
-// This function sets caw attributes using the id to
-// fetch data from the keyValue store
-// Args: Caw to write to, CawId, kvstore to fetch data from
-// Returns: Void, populates the caw object passed in
-void makeCawFromId(Caw *caw, const std::string &caw_id,
-                   KeyValueStoreInterface &kvstore);
-
 // Functions to be passed into Faz
 // This function registers a user
 // Args: EventRequest that contains a RegisteruserRequst
