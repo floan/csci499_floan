@@ -5,8 +5,7 @@
 #include <vector>
 
 CawClient::CawClient(const std::shared_ptr<Channel> &channel) {
-  // Creating our connection with Faz
-  stub_(FazService::NewStub(channel));
+  client_(/* INSERT CHANNLE HERE */);
   functionToEventType_["registeruser"] = 1;
   functionToEventType_["caw"] = 2;
   functionToEventType_["read"] = 3;
@@ -19,31 +18,20 @@ bool CawClient::RegisterUser(std::string username) {
   RegisteruserRequest register_request;
   RegisteruserReply register_response;
   // Setting up payload wrapper 
-  Any requestPayload;
-  Any responsePayload;
-  // Setting up request/response wrappers
-  EventRequest requestWrapper; 
-  EventReply responseWrapper;
-  // Creating grpc context variable
-  ClientContext context;
+  Any request;
+  // Response payload has to be dynamic
+  // because it will be populated in faz
+  Any* response = new Any();
 
   // Populating objects with data
   register_request.set_username(username);
 
-  // Adding payload objects
-  // to their type 'Any' wrappers
-  requestPayload.PackFrom(register_request);
-  responsePayload.PackFrom(register_response);
+  // Adding request object object
+  // to their type 'Any' wrapper
+  request.PackFrom(register_request);
 
-  // Filling the EventRequest Wrappers with info 
-  requestWrapper.set_allocated_payload(requestPayload);
-  requestWrapper.set_event_type(functionToEventType_["registeruser"]);
-
-  // Filling the EventResponse wrapper with info
-  responseWrapper.set_allocated_payload(responsePayload);
-
-  // Making a call to the Faz server
-  Status status = stub_->event(&context, requestWrapper, &responseWrapper);
+  Status status = client_.Event(request, response, 
+              functionToEventType_["registeruser"]);
 
   // Processing response
   bool registerSuccessBool; 
@@ -56,6 +44,7 @@ bool CawClient::RegisterUser(std::string username) {
     LOG(ERROR) << status.error_message();
     registerSuccessBool = false;
   }
+  delete response;
   return registerSuccessBool;
 }
 
@@ -63,13 +52,8 @@ bool CawClient::PostCaw(const std::string& username, const std::string& text, in
   CawRequest caw_request;
   CawReply caw_response;
 
-  Any requestPayload;
-  Any responsePayload;
-
-  EventRequest requestWrapper; 
-  EventReply responseWrapper;
-
-  ClientContext context;
+  Any request;
+  Any* response = new Any();
 
   caw_request.set_username(username);
   caw_request.set_text(text);
@@ -78,22 +62,17 @@ bool CawClient::PostCaw(const std::string& username, const std::string& text, in
     caw_request.set_parent_id(std::to_string(parent_id));
   }
 
-  requestPayload.PackFrom(caw_request);
-  responsePayload.PackFrom(caw_response);
+  request.PackFrom(caw_request);
 
-  requestWrapper.set_allocated_payload(requestPayload);
-  requestWrapper.set_event_type(functionToEventType_["caw"]);
-
-  responseWrapper.set_allocated_payload(responsePayload);
-
-  Status status = stub_->event(&context, requestWrapper, &responseWrapper);
+  Status status = client_.Event(request, response,
+                      functionToEventType_["caw"]);
 
   // Processing response
   bool postCawSuccessBool; 
   Caw caw; 
   if (status.ok()) {
     // Extract caw from response
-    responseWrapper.payload().UnpackTo(&caw_response);
+    response->UnpackTo(&caw_response);
     caw = caw_response.caw();
     std::cout << "Your caw was posted successfully!" << std::endl;
     std::cout << "Here's your caw information: " << std::endl;
@@ -106,6 +85,7 @@ bool CawClient::PostCaw(const std::string& username, const std::string& text, in
     LOG(ERROR) << status.error_message();
     registerSuccessBool = false;
   }
+  delete response;
   return registerSuccessBool;
 }
 
@@ -113,26 +93,16 @@ bool CawClient::FollowUser(const std::string& username, const std::string& to_fo
   FollowRequest follow_request;
   FollowReply follow_response;
 
-  Any requestPayload;
-  Any responsePayload;
-
-  EventRequest requestWrapper; 
-  EventReply responseWrapper;
-
-  ClientContext context;
+  Any request;
+  Any* response = new Any();
 
   follow_request.set_username(username);
   follow_request.set_to_follow(to_follow);
 
-  requestPayload.PackFrom(follow_request);
-  responsePayload.PackFrom(follow_response);
+  request.PackFrom(follow_request);
 
-  requestWrapper.set_allocated_payload(requestPayload);
-  requestWrapper.set_event_type(functionToEventType_["follow"]);
-
-  responseWrapper.set_allocated_payload(responsePayload);
-
-  Status status = stub_->event(&context, requestWrapper, &responseWrapper);
+  Status status = client_.Event(request, response,
+                    functionToEventType_["follow"]);
 
   // Processing response
   bool followSuccessBool; 
@@ -152,35 +122,23 @@ bool CawClient::ReadCaw(int caw_id) {
   ReadRequest read_request;
   ReadReply read_response;
 
-  Any requestPayload;
-  Any responsePayload;
-
-  EventRequest requestWrapper; 
-  EventReply responseWrapper;
-
-  ClientContext context;
+  Any request;
+  Any* response = new Any();
 
   read_request.set_caw_id(caw_id);
 
-  requestPayload.PackFrom(read_request);
-  responsePayload.PackFrom(read_response);
+  request.PackFrom(read_request);
 
-  requestWrapper.set_allocated_payload(requestPayload);
-  requestWrapper.set_event_type(functionToEventType_["read"]);
-
-  responseWrapper.set_allocated_payload(responsePayload);
-
-  Status status = stub_->event(&context, requestWrapper, &responseWrapper);
+  Status status = client_.Event(request, response,
+                      functionToEventType_["read"]);
 
   // Processing response
   bool readSuccessBool; 
   if (status.ok()) {
-    responseWrapper.payload().UnpackTo(&read_response);
+    response->UnpackTo(&read_response);
     std::cout << "Your request was posted successfully!" << std::endl;
     std::cout << "Here's your thread information: " << std::endl;
     for (const Caw& caw : read_response.caws()) {
-      std::cout << "Your caw was posted successfully!" << std::endl;
-      std::cout << "Here's your caw information: " << std::endl;
       std::cout << "\t" << "Username: " << caw.username() << std::endl;
       std::cout << "\t" << "Text: " << caw.text() << std::endl;
       std::cout << "\t" << "Id: " << caw.id() << std::endl;
@@ -199,30 +157,20 @@ bool CawClient::GetProfile(const std::string& username) {
   ProfileRequest profile_request;
   ProfileReply profile_response;
 
-  Any requestPayload;
-  Any responsePayload;
-
-  EventRequest requestWrapper; 
-  EventReply responseWrapper;
-
-  ClientContext context;
+  Any request;
+  Any* response = new Any(); 
 
   profile_request.set_username(username);
 
   requestPayload.PackFrom(read_request);
-  responsePayload.PackFrom(read_response);
 
-  requestWrapper.set_allocated_payload(requestPayload);
-  requestWrapper.set_event_type(functionToEventType_["profile"]);
-
-  responseWrapper.set_allocated_payload(responsePayload);
-
-  Status status = stub_->event(&context, requestWrapper, &responseWrapper);
+  Status status = client_.Event(request, response,
+                  functionToEventType_["profile"]);
 
   // Processing response
   bool profileSuccessBool; 
   if (status.ok()) {
-    responseWrapper.payload().UnpackTo(&profile_response);
+    response->UnpackTo(&profile_response);
     std::cout << "We have retrieved the profile!" << std::endl;
     std::cout << "Here's your information: " << std::endl;
     std::cout << "Here are users followers: " << std::endl;

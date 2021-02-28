@@ -1,5 +1,4 @@
 #include "caw.pb.h"
-#include "faz.grpc.pb.h"
 #include <google/protobuf/any.pb.h>
 #include <grpcpp/grpcpp.h>
 
@@ -10,7 +9,7 @@
 
 #include <glog/logging.h>
 
-#include "../../faz/"
+#include "../../faz/client/faz_client.h"
 
 using google::protobuf::Any;
 using grpc::Channel;
@@ -70,8 +69,9 @@ public:
   bool GetProfile(const std::string& username);
 
 private:
-  // A connection to the Faz Server
-  std::unique_ptr<faz::FazService::Stub> stub_;
   // A map linking functionName with eventType
   std::unordered_map<std::string, int> functionToEventType_;
+  // An instance of the Faz Client 
+  FazClient client_;
+
 };
