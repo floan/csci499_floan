@@ -28,7 +28,7 @@ public:
   // This is a constructor that takes in a channel instance
   // This channel is used to connect to the backend
   KeyValueStoreClient(const std::shared_ptr<Channel> &channel)
-      : stub_(Greeter::NewStub(channel)){};
+      : stub_(KeyValueStore::NewStub(channel)){};
   // Performs normal put functionality
   // Args: Key, Value pair to store in kvstore
   // Returns: boolean indicating success/failure

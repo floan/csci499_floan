@@ -65,11 +65,36 @@ add_custom_command(
         -I "${store_proto_path}"
         --plugin=protoc-gen-grpc="${_GRPC_CPP_PLUGIN_EXECUTABLE}"
         "${store_proto}"
-      DEPENDS "${store_proto}")
+      DEPENDS "${store_proto}" "build/_deps/protobuf-src/src/google/protobuf/any.proto")
 
 ####################### GRPC SETUP FOR KVSTORE END ############################
 
-######################### GRPC SETUP FOR CAW #############################
+#######################  GRPC SETUP FOR FAZ BEGIN  ############################
+
+get_filename_component(faz_proto "protos/faz.proto" ABSOLUTE)
+get_filename_component(faz_proto_path "${faz_proto}" PATH)
+
+# Generated sources
+set(faz_proto_srcs "${CMAKE_CURRENT_BINARY_DIR}/faz.pb.cc")
+set(faz_proto_hdrs "${CMAKE_CURRENT_BINARY_DIR}/faz.pb.h")
+set(faz_grpc_srcs "${CMAKE_CURRENT_BINARY_DIR}/faz.grpc.pb.cc")
+set(faz_grpc_hdrs "${CMAKE_CURRENT_BINARY_DIR}/faz.grpc.pb.h")
+
+add_custom_command(
+      OUTPUT "${faz_proto_srcs}" "${faz_proto_hdrs}" "${faz_grpc_srcs}" "${faz_grpc_hdrs}"
+      COMMAND ${_PROTOBUF_PROTOC}
+      ARGS --grpc_out "${CMAKE_CURRENT_BINARY_DIR}"
+        --cpp_out "${CMAKE_CURRENT_BINARY_DIR}"
+        -I "${faz_proto_path}"
+        -I "${CMAKE_CURRENT_BINARY_DIR}/_deps/protobuf-src/src"
+        --plugin=protoc-gen-grpc="${_GRPC_CPP_PLUGIN_EXECUTABLE}"
+        "${faz_proto}"
+      DEPENDS "${faz_proto}")
+
+#######################  GRPC SETUP FOR FAZ END  ############################
+
+
+#########################   GRPC SETUP FOR CAW   #############################
 
 get_filename_component(caw_proto "protos/caw.proto" ABSOLUTE)
 get_filename_component(caw_proto_path "${caw_proto}" PATH)
@@ -103,6 +128,9 @@ target_link_libraries(kv_store ${_GRPC_GRPCPP} ${_PROTOBUF_LIBPROTOBUF} gflags::
 
 add_executable(caw src/caw/caw.cpp ${caw_proto_srcs} ${caw_grpc_srcs})
 target_link_libraries(caw ${_GRPC_GRPCPP} ${_PROTOBUF_LIBPROTOBUF} gflags::gflags glog::glog)
+
+add_executable(faz src/faz/faz.cpp ${faz_proto_srcs} ${faz_grpc_srcs})
+target_link_libraries(faz ${_GRPC_GRPCPP} ${_PROTOBUF_LIBPROTOBUF} gflags::gflags glog::glog)
 
 add_executable(kv_store_test tests/KeyValueStoreTests.cpp src/key_value_store/core/KeyValueStore.cpp)
 target_link_libraries(kv_store_test gtest gtest_main)
