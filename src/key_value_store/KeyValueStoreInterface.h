@@ -1,3 +1,6 @@
+#ifndef KEY_VALUE_STORE_INTERFACE_
+#define KEY_VALUE_STORE_INTERFACE_
+
 #include <string>
 #include <vector>
 
@@ -14,3 +17,4 @@ public:
   virtual std::vector<std::string> Get(const std::string &key) = 0;
   virtual bool Remove(const std::string &key) = 0;
 };
+#endif
