@@ -45,7 +45,7 @@ std::vector<std::string> KeyValueStoreClient::Get(const std::string &key) {
   Status status = stream->Finish();
   if (status.ok()) {
   } else {
-    LOG(ERROR) << status.error_code() << ": " << status.error_message()
+    LOG(ERROR) << status.error_code() << ": " << status.error_message();
   }
   // Either way we return values, empty vector or not
   return values;
@@ -63,6 +63,7 @@ bool KeyValueStoreClient::Remove(const std::string &key) {
     return true;
   } else {
     LOG(ERROR) << status.error_code() << ": "
-               << status.error_message() return false;
+               << status.error_message();
+    return false;
   }
 }
