@@ -4,17 +4,7 @@
 #include <string>
 #include <vector>
 
-CawClient::CawClient(const std::shared_ptr<Channel> &channel) {
-  std::string target_str = "localhost:50000";
-  client_(grpc::CreateChannel(target_str, grpc::InsecureChannelCredentials()));
-  functionToEventType_["registeruser"] = 1;
-  functionToEventType_["caw"] = 2;
-  functionToEventType_["read"] = 3;
-  functionToEventType_["follow"] = 4;
-  functionToEventType_["profile"] = 5;
-}
-
-bool CawClient::RegisterUser(std::string username) {
+bool CawClient::RegisterUser(const std::string &username) {
   // Setting up payload objects
   RegisteruserRequest register_request;
   RegisteruserReply register_response;
@@ -85,13 +75,15 @@ bool CawClient::PostCaw(const std::string &username, const std::string &text,
               << "Id: " << caw.id() << std::endl;
     std::cout << "\t"
               << "Parent_Id: " << caw.parent_id() << std::endl;
+    std::cout << "\t"
+              << "Time created: " << caw.timestamp().seconds() << std::endl;
     postCawSuccessBool = true;
   } else {
     std::cout << "There was an error in posting your caw." << std::endl;
-    registerSuccessBool = false;
+    postCawSuccessBool = false;
   }
   delete response;
-  return registerSuccessBool;
+  return postCawSuccessBool;
 }
 
 bool CawClient::FollowUser(const std::string &username,
@@ -121,6 +113,7 @@ bool CawClient::FollowUser(const std::string &username,
     std::cout << "There was an error in following the user." << std::endl;
     followSuccessBool = false;
   }
+  delete response;
   return followSuccessBool;
 }
 
@@ -131,7 +124,7 @@ bool CawClient::ReadCaw(int caw_id) {
   Any request;
   Any *response = new Any();
 
-  read_request.set_caw_id(caw_id);
+  read_request.set_caw_id(std::to_string(caw_id));
 
   request.PackFrom(read_request);
 
@@ -142,7 +135,6 @@ bool CawClient::ReadCaw(int caw_id) {
   bool readSuccessBool;
   if (status.ok()) {
     response->UnpackTo(&read_response);
-    std::cout << "Your request was posted successfully!" << std::endl;
     std::cout << "Here's your thread information: " << std::endl;
     for (const Caw &caw : read_response.caws()) {
       std::cout << "\t"
@@ -154,6 +146,8 @@ bool CawClient::ReadCaw(int caw_id) {
       std::cout << "\t"
                 << "Parent_Id: " << caw.parent_id() << std::endl;
       std::cout << "\t"
+                << "Time created: " << caw.timestamp().seconds() << std::endl;
+      std::cout << "\t"
                 << "==============================" << std::endl;
     }
     readSuccessBool = true;
@@ -161,6 +155,7 @@ bool CawClient::ReadCaw(int caw_id) {
     std::cout << "There was an error in reading the caw." << std::endl;
     readSuccessBool = false;
   }
+  delete response;
   return readSuccessBool;
 }
 
@@ -173,7 +168,7 @@ bool CawClient::GetProfile(const std::string &username) {
 
   profile_request.set_username(username);
 
-  requestPayload.PackFrom(read_request);
+  request.PackFrom(profile_request);
 
   Status status =
       client_.Event(request, response, functionToEventType_["profile"]);
@@ -184,11 +179,11 @@ bool CawClient::GetProfile(const std::string &username) {
     response->UnpackTo(&profile_response);
     std::cout << "We have retrieved the profile!" << std::endl;
     std::cout << "Here's your information: " << std::endl;
-    std::cout << "Here are users followers: " << std::endl;
+    std::cout << "Here are user's followers: " << std::endl;
     for (const std::string &follower : profile_response.followers()) {
       std::cout << "\t" << follower << std::endl;
     }
-    std::cout << "Here are users following: : " << std::endl;
+    std::cout << "Here are user's following: " << std::endl;
     for (const std::string &user : profile_response.following()) {
       std::cout << "\t" << user << std::endl;
     }
@@ -197,5 +192,57 @@ bool CawClient::GetProfile(const std::string &username) {
     std::cout << "There was an error in retrieving your profile." << std::endl;
     profileSuccessBool = false;
   }
+  delete response;
   return profileSuccessBool;
+}
+
+bool CawClient::HookFunction(std::string functionName) {
+  Status status =
+      client_.HookFunction(functionToEventType_[functionName], functionName);
+  if (status.ok()) {
+    std::cout << "Your function was successfully hooked." << std::endl;
+    return true;
+  } else {
+    std::cout << "Something went wrong when hooking your function."
+              << std::endl;
+    return false;
+  }
+}
+
+bool CawClient::UnhookFunction(std::string functionName) {
+  Status status = client_.UnhookFunction(functionToEventType_[functionName]);
+  if (status.ok()) {
+    std::cout << "Your function was successfully unhooked." << std::endl;
+    return true;
+  } else {
+    std::cout << "Something went wrong when unhooking your function."
+              << std::endl;
+    return false;
+  }
+}
+
+bool CawClient::HookAll() {
+  Status status;
+  for (auto entry : functionToEventType_) {
+    status = client_.HookFunction(entry.second, entry.first);
+    if (!status.ok()) {
+      std::cout << "There was a problem hooking all functions" << std::endl;
+      return false;
+    }
+  }
+  std::cout << "Successfully hooked all functions." << std::endl;
+  return true;
+}
+
+bool CawClient::UnhookAll() {
+  Status status;
+  for (auto entry : functionToEventType_) {
+    status = client_.UnhookFunction(entry.second);
+    if (!status.ok()) {
+      std::cout << "There was a problem unhooking all functions" << std::endl;
+      return false;
+    }
+  }
+  std::cout << "Successfully unhooked all functions." << std::endl;
+  return true;
 }

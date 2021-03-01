@@ -120,17 +120,14 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
 set(kvstore_dir src/key_value_store/)
 
-add_executable(caw_cli src/cli_tool/caw_cli.cpp)
-target_link_libraries(caw_cli gflags::gflags)
-
 add_executable(kv_store src/key_value_store/kv_store.cpp ${kvstore_dir}/server/kvstore_server.cpp ${kvstore_dir}/core/KeyValueStore.cpp ${store_proto_srcs} ${store_grpc_srcs})
 target_link_libraries(kv_store ${_GRPC_GRPCPP} ${_PROTOBUF_LIBPROTOBUF} gflags::gflags glog::glog)
 
-add_executable(caw src/caw/caw.cpp ${caw_proto_srcs} ${caw_grpc_srcs})
-target_link_libraries(caw ${_GRPC_GRPCPP} ${_PROTOBUF_LIBPROTOBUF} gflags::gflags glog::glog)
-
-add_executable(faz src/faz/faz.cpp ${faz_proto_srcs} ${faz_grpc_srcs})
+add_executable(faz src/faz/faz.cpp src/faz/server/faz_server.cpp src/faz/client/faz_client.cpp src/caw/functions/caw_functions.cpp ${kvstore_dir}/client/kvstore_client.cpp ${store_proto_srcs} ${store_grpc_srcs} ${caw_proto_srcs} ${caw_grpc_srcs} ${faz_proto_srcs} ${faz_grpc_srcs})
 target_link_libraries(faz ${_GRPC_GRPCPP} ${_PROTOBUF_LIBPROTOBUF} gflags::gflags glog::glog)
+
+add_executable(caw src/cli_tool/caw_cli.cpp src/caw/client/caw_client.cpp src/faz/client/faz_client.cpp ${faz_proto_srcs} ${faz_grpc_srcs} ${caw_proto_srcs} ${caw_grpc_srcs})
+target_link_libraries(caw ${_GRPC_GRPCPP} ${_PROTOBUF_LIBPROTOBUF} gflags::gflags glog::glog)
 
 add_executable(kv_store_test tests/KeyValueStoreTests.cpp src/key_value_store/core/KeyValueStore.cpp)
 target_link_libraries(kv_store_test gtest gtest_main)

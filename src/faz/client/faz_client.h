@@ -1,6 +1,7 @@
+#ifndef FAZ_CLIENT_
+#define FAZ_CLIENT_
+
 #include "faz.grpc.pb.h"
-#include <google/protobuf/any.pb.h>
-#include <grpcpp/grpcpp.h>
 
 #include <iostream>
 #include <string>
@@ -8,8 +9,8 @@
 #include <vector>
 
 #include <glog/logging.h>
-
-#include "../../faz/client/faz_client.h"
+#include <google/protobuf/any.pb.h>
+#include <grpcpp/grpcpp.h>
 
 using google::protobuf::Any;
 using grpc::Channel;
@@ -19,6 +20,7 @@ using grpc::Status;
 
 using faz::EventReply;
 using faz::EventRequest;
+using faz::FazService;
 using faz::HookReply;
 using faz::HookRequest;
 using faz::UnhookReply;
@@ -29,17 +31,17 @@ using faz::UnhookRequest;
 // uses and our faz server that runs
 // our functions.
 class FazClient final {
-public:
+ public:
   // This is a constructor that takes in a channel instance
   // This channel is used to connect to the backend
   FazClient(const std::shared_ptr<Channel> &channel)
-      : stub_(Greeter::NewStub(channel)){};
+      : stub_(FazService::NewStub(channel)){};
   // This method links to the event method in the server class
   // This executes our stored function via our FaaS Faz
   // Args: A request and response of protobuf Any type. These
   //       represent the input and output from our registered function
   // Returns: A grpc Status indicating success / failure
-  Status Event(const Any request, Any *response, int eventType);
+  Status Event(Any request, Any *response, int eventType);
   // This method calls the Faz hook function. This is supposed to
   // hook a custom function to our FaaS.
   // Args: An event type that corresponds with the function call
@@ -53,8 +55,9 @@ public:
   // Returns: A grpc Status indicating success / failure
   Status UnhookFunction(int eventType);
 
-private:
+ private:
   // This is the stub that we will use to
   // connect to our Faz server
   std::unique_ptr<faz::FazService::Stub> stub_;
 };
+#endif

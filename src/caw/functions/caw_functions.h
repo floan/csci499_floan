@@ -1,12 +1,16 @@
+#ifndef CAW_FUNCTIONS_
+#define CAW_FUNCTIONS_
+
 #include "caw.pb.h"
-#include <google/protobuf/any.pb.h>
-#include <grpcpp/grpcpp.h>
 
 #include <string>
 #include <vector>
 
-#include "../../key_value_store/KeyValueStoreInterface.h"
 #include <glog/logging.h>
+#include <google/protobuf/any.pb.h>
+#include <grpcpp/grpcpp.h>
+
+#include "../../key_value_store/KeyValueStoreInterface.h"
 
 using google::protobuf::Any;
 using grpc::Channel;
@@ -72,3 +76,4 @@ Status FollowUser(const Any &EventRequest, Any &EventReply,
 // Returns: Status indicating success / error message
 Status GetProfile(const Any &EventRequest, Any &EventReply,
                   KeyValueStoreInterface &kvstore);
+#endif

@@ -2,25 +2,19 @@
 // to be registered with, and used by Faz
 #include "caw_functions.h"
 
+#include <sys/time.h>
+
 #include <chrono>
 #include <ctime>
 #include <sstream>
 #include <string>
 #include <sys/time.h>
 #include <vector>
-
-std::vector<std::string> stringToVector(const std::string &strToConvert) {
-  std::stringstream ss(strToConvert);
-  std::vector<std::string> toReturn;
-  std::string word;
-  while (ss >> word) {
-    toReturn.push_back(word);
-  }
-  return toReturn;
-}
+#include <stack>
 
 Status RegisterUser(const Any &EventRequest, Any &EventReply,
                     KeyValueStoreInterface &kvstore) {
+  LOG(INFO) << "Processing RegisterUser request.";
   RegisteruserRequest request;
   RegisteruserReply response;
   EventRequest.UnpackTo(&request);
@@ -40,6 +34,7 @@ Status RegisterUser(const Any &EventRequest, Any &EventReply,
 
 Status PostCaw(const Any &EventRequest, Any &EventReply,
                KeyValueStoreInterface &kvstore) {
+  LOG(INFO) << "Processing PostCaw request.";
   CawRequest request;
   CawReply response;
   EventRequest.UnpackTo(&request);
@@ -69,18 +64,12 @@ Status PostCaw(const Any &EventRequest, Any &EventReply,
       kvstore.Put("latestCawId", currentCawId);
     }
 
-    auto millisec_since_epoch =
-        std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch())
-            .count();
-    auto sec_since_epoch =
-        std::chrono::duration_cast<std::chrono::seconds>(
-            std::chrono::system_clock::now().time_since_epoch())
-            .count();
+    timeval currTime;
+    gettimeofday(&currTime, NULL);
 
     Timestamp *timestamp = new Timestamp;
-    timestamp->set_seconds(sec_since_epoch);
-    timestamp->set_useconds(millisec_since_epoch);
+    timestamp->set_seconds(currTime.tv_sec);
+    timestamp->set_useconds(currTime.tv_usec);
 
     Caw *currentCaw = new Caw;
     currentCaw->set_username(request.username());
@@ -101,7 +90,6 @@ Status PostCaw(const Any &EventRequest, Any &EventReply,
     if (request.parent_id() != "") {
       kvstore.Put("caw_" + request.parent_id() + "_children", currentCawId);
     }
-
     // We will return this caw
     response.set_allocated_caw(currentCaw);
     status = Status::OK;
@@ -114,6 +102,7 @@ Status PostCaw(const Any &EventRequest, Any &EventReply,
 // it does not get subthreads of its subthreads (1 level bfs, not dfs)
 Status ReadCaw(const Any &EventRequest, Any &EventReply,
                KeyValueStoreInterface &kvstore) {
+  LOG(INFO) << "Processing ReadCaw request.";
   ReadRequest request;
   ReadReply response;
   Status status;
@@ -122,19 +111,27 @@ Status ReadCaw(const Any &EventRequest, Any &EventReply,
   if (kvstore.Get("caw_" + caw_id).size() == 0) {
     status = Status(StatusCode::NOT_FOUND, "The provided caw does not exist.");
   } else {
-    std::string currentCawString = kvstore.Get("caw_" + caw_id)[0];
-    // Add this caw to the reply stream
-    Caw *addCawsToResponse = response.add_caws();
-    addCawsToResponse->ParseFromString(currentCawString);
-    std::vector<std::string> childrenCaws =
-        kvstore.Get("caw_" + caw_id + "_children");
+    std::stack<std::string> dfsStack;
+    std::string currentCawString; 
+    Caw *addCawsToResponse;
+    std::vector<std::string> childrenCaws;
 
-    // repeat process for children
-    for (const std::string &id : childrenCaws) {
-      // Add all the children caws to the reply stream
-      currentCawString = kvstore.Get("caw_" + id)[0];
+    dfsStack.push(caw_id);
+    while (!dfsStack.empty()) {
+      caw_id = dfsStack.top(); 
+      dfsStack.pop();
+      currentCawString = kvstore.Get("caw_" + caw_id)[0];
       addCawsToResponse = response.add_caws();
       addCawsToResponse->ParseFromString(currentCawString);
+      std::vector<std::string> childrenCaws =
+        kvstore.Get("caw_" + caw_id + "_children");
+      for (int i = childrenCaws.size() - 1; i >= 0; i--) {
+        // Pushing into stack backwards because we
+        // want replys to be printed chronologically
+        // i.e. first reply and all its replies printed 
+        // first, then second reply and all its replies etc.
+        dfsStack.push(childrenCaws[i]);
+      }
     }
     status = Status::OK;
   }
@@ -145,11 +142,14 @@ Status ReadCaw(const Any &EventRequest, Any &EventReply,
 
 Status FollowUser(const Any &EventRequest, Any &EventReply,
                   KeyValueStoreInterface &kvstore) {
+  LOG(INFO) << "Processing FollowUser request.";
   FollowRequest request;
   FollowReply response;
   Status status;
   EventRequest.UnpackTo(&request);
   std::vector<std::string> userList = kvstore.Get("caw_users");
+  std::vector<std::string> following = 
+    kvstore.Get("caw_user_" + request.username() + "_following");
   if (std::find(userList.begin(), userList.end(), request.username()) ==
           userList.end() ||
       std::find(userList.begin(), userList.end(), request.to_follow()) ==
@@ -158,14 +158,8 @@ Status FollowUser(const Any &EventRequest, Any &EventReply,
         Status(StatusCode::NOT_FOUND, "You have not provided valid usernames");
   } else if (request.username() == request.to_follow()) {
     status = Status(StatusCode::INVALID_ARGUMENT, "You cannot follow yourself");
-  } else if (std::find(
-                 kvstore.Get("caw_user_" + request.username() + "_following")
-                     .begin(),
-                 kvstore.Get("caw_user_" + request.username() + "_following")
-                     .end(),
-                 request.to_follow()) !=
-             kvstore.Get("caw_user_" + request.username() + "_following")
-                 .end()) {
+  } else if (std::find(following.begin(), following.end(), 
+             request.to_follow()) != following.end()) {
     status = Status(StatusCode::INVALID_ARGUMENT,
                     "You are already following the user");
   } else {
@@ -180,6 +174,7 @@ Status FollowUser(const Any &EventRequest, Any &EventReply,
 
 Status GetProfile(const Any &EventRequest, Any &EventReply,
                   KeyValueStoreInterface &kvstore) {
+  LOG(INFO) << "Processing GetProfile request.";
   ProfileRequest request;
   ProfileReply response;
   Status status;
