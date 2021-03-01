@@ -2,9 +2,9 @@
 
 #include <iostream>
 
-#include <grpcpp/grpcpp.h>
 #include <gflags/gflags.h>
 #include <glog/logging.h>
+#include <grpcpp/grpcpp.h>
 
 void RunServer() {
   std::string server_address("0.0.0.0:50000");
@@ -25,9 +25,8 @@ void RunServer() {
   server->Wait();
 }
 
+int main(int argc, char **argv) {
+  RunServer();
 
-int main(int argc, char** argv) {
-  RunServer(); 
-
-  return 0; 
+  return 0;
 }

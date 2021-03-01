@@ -46,10 +46,11 @@ Status FazServiceImpl::event(ServerContext *context,
     // the Any objects.
     // We pass the object by reference, mutable_payload() returns
     // the pointer so we dereference it before passing it in.
-    std::function<Status(const Any &, Any &, KeyValueStoreInterface &)> eventFunction; 
+    std::function<Status(const Any &, Any &, KeyValueStoreInterface &)>
+        eventFunction;
     eventFunction = caw_functions_[functionName];
-    status = eventFunction(
-        request->payload(), *(response->mutable_payload()), kvstore_);
+    status = eventFunction(request->payload(), *(response->mutable_payload()),
+                           kvstore_);
   }
   return status;
 }

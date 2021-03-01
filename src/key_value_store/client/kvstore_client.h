@@ -2,14 +2,13 @@
 #define KEY_VALUE_STORE_CLIENT_
 
 #include "../KeyValueStoreInterface.h"
-
 #include "store.grpc.pb.h"
-#include <grpcpp/grpcpp.h>
 
 #include <string>
 #include <vector>
 
 #include <glog/logging.h>
+#include <grpcpp/grpcpp.h>
 
 using grpc::Channel;
 using grpc::ClientContext;
@@ -27,7 +26,7 @@ using kvstore::RemoveRequest;
 // with grpc. It processes a request in cpp syntax input to
 // grpc and process the result to cpp syntax output
 class KeyValueStoreClient final : public KeyValueStoreInterface {
-public:
+ public:
   // This is a constructor that takes in a channel instance
   // This channel is used to connect to the backend
   KeyValueStoreClient(const std::shared_ptr<Channel> &channel)
@@ -45,7 +44,7 @@ public:
   // Returns: boolean indicating success/failure
   bool Remove(const std::string &key);
 
-private:
+ private:
   // A connection to our grpc server
   std::unique_ptr<kvstore::KeyValueStore::Stub> stub_;
 };

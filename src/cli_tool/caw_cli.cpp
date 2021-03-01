@@ -19,7 +19,6 @@ DEFINE_string(unhook, "", "Unhooks the given function");
 DEFINE_bool(hookall, false, "Hooks all stored functions");
 DEFINE_bool(unhookall, false, "Unhooks all stored functions");
 
-
 int main(int argc, char *argv[]) {
   // Checking and handeling arguments
   if (argc < 2) {
@@ -31,9 +30,11 @@ int main(int argc, char *argv[]) {
 
   // Ensuring a username is always specified
   // With exception of registeruser
-  if (FLAGS_registeruser == "" && FLAGS_user == "" && FLAGS_hook == "" 
-      && FLAGS_unhook == "" && FLAGS_unhookall == false && FLAGS_hookall == false) {
-    std::cerr << "You cannot perform any action other than hooking/unhooking without specifying a username"
+  if (FLAGS_registeruser == "" && FLAGS_user == "" && FLAGS_hook == "" &&
+      FLAGS_unhook == "" && FLAGS_unhookall == false &&
+      FLAGS_hookall == false) {
+    std::cerr << "You cannot perform any action other than hooking/unhooking "
+                 "without specifying a username"
               << std::endl;
     std::cerr << "Please consider using the --user <username> flag"
               << std::endl;
@@ -41,8 +42,9 @@ int main(int argc, char *argv[]) {
   }
 
   if (FLAGS_hookall && FLAGS_unhookall) {
-    std::cerr << "You cannot hook all and unhook all at the same time" << std::endl;
-    return 1; 
+    std::cerr << "You cannot hook all and unhook all at the same time"
+              << std::endl;
+    return 1;
   }
 
   if (FLAGS_reply != -1 && FLAGS_caw == "") {
@@ -73,6 +75,8 @@ int main(int argc, char *argv[]) {
     bool profileSuccess = client.GetProfile(FLAGS_user);
   } else if (FLAGS_hook != "") {
     bool hookSuccess = client.HookFunction(FLAGS_hook);
+  } else if (FLAGS_unhook != "") {
+    bool unhookSuccess = client.UnhookFunction(FLAGS_unhook);
   } else if (FLAGS_hookall) {
     bool hookallSuccess = client.HookAll();
   } else if (FLAGS_unhookall) {

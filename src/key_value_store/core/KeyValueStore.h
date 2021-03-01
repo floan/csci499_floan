@@ -14,7 +14,7 @@ typedef std::unordered_map<std::string, std::vector<std::string>> hashMap;
 // This class is implements our core key value
 // store functionality
 class KeyValueStore : public KeyValueStoreInterface {
-public:
+ public:
   // Declaring constructor & destructor in .h file
   KeyValueStore(){};
   ~KeyValueStore(){};
@@ -31,7 +31,7 @@ public:
   // Returns: boolean indicating success/failure
   bool Remove(const std::string &key);
 
-private:
+ private:
   // This is the underlying data structure
   // For our key value store
   hashMap kv_store_;

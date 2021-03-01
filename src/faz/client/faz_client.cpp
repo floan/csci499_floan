@@ -1,9 +1,10 @@
 #include "faz_client.h"
-#include "../../caw/functions/caw_functions.h"
 
 #include <iostream>
 #include <string>
 #include <vector>
+
+#include "../../caw/functions/caw_functions.h"
 
 Status FazClient::Event(Any request, Any *response, int eventType) {
   // Setting up request/response wrappers

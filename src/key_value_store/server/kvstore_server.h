@@ -1,9 +1,9 @@
 #ifndef KEY_VALUE_STORE_SERVER_
 #define KEY_VALUE_STORE_SERVER_
 
-#include <grpcpp/grpcpp.h>
-
 #include "store.grpc.pb.h"
+
+#include <grpcpp/grpcpp.h>
 
 #include "../core/KeyValueStore.h"
 
@@ -24,7 +24,7 @@ using kvstore::RemoveRequest;
 // This class implements the server side
 // functionality of the key value store
 class KeyValueStoreImpl final : public kvstore::KeyValueStore::Service {
-public:
+ public:
   KeyValueStoreImpl() : store_(){};
   // This function performs normal put functionality
   // by unwrapping protobuf messages
@@ -52,7 +52,7 @@ public:
   Status remove(ServerContext *context, const RemoveRequest *request,
                 RemoveReply *response) override;
 
-private:
+ private:
   // Local variable from core class
   KeyValueStore store_;
 };

@@ -2,8 +2,6 @@
 #define CAW_CLIENT_
 
 #include "caw.pb.h"
-#include <google/protobuf/any.pb.h>
-#include <grpcpp/grpcpp.h>
 
 #include <iostream>
 #include <string>
@@ -11,6 +9,8 @@
 #include <vector>
 
 #include <glog/logging.h>
+#include <google/protobuf/any.pb.h>
+#include <grpcpp/grpcpp.h>
 
 #include "../../faz/client/faz_client.h"
 
@@ -38,12 +38,16 @@ using caw::Timestamp;
 // user uses and our faz server that runs
 // our functions.
 class CawClient final {
-public:
+ public:
   // Initialize to set up and connect Faz Server
   CawClient()
-  : client_(grpc::CreateChannel("localhost:50000", grpc::InsecureChannelCredentials())),
-  functionToEventType_({{"registeruser", 1}, {"caw", 2}, {"read", 3}, {"follow", 4}, {"profile", 5}})
-    {}
+      : client_(grpc::CreateChannel("localhost:50000",
+                                    grpc::InsecureChannelCredentials())),
+        functionToEventType_({{"registeruser", 1},
+                              {"caw", 2},
+                              {"read", 3},
+                              {"follow", 4},
+                              {"profile", 5}}) {}
 
   // Calls the Faz server to perform the
   // Following operations
@@ -80,7 +84,7 @@ public:
   bool HookAll();
   bool UnhookAll();
 
-private:
+ private:
   // A map linking functionName with eventType
   std::unordered_map<std::string, int> functionToEventType_;
   // An instance of the Faz Client

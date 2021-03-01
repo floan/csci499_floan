@@ -10,7 +10,7 @@
 // cpp class instance for testing if
 // both of them inherit from this interface
 class KeyValueStoreInterface {
-public:
+ public:
   virtual ~KeyValueStoreInterface(){};
 
   virtual bool Put(const std::string &key, const std::string &value) = 0;
