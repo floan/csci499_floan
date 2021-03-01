@@ -55,8 +55,10 @@ Everything should be green and passing! Both these commands are to be run inside
 
 In order to fully use the application, you will have to start up some servers. Please open 3 terminals and navigate to the build folder. Enter these two commands on DIFFERENT terminals. 
 
-1. `./faz`
-2. `./kv_store`
+```
+1. ./faz
+2. ./kv_store
+```
 
 The third terminal will be yours to use with Caw! Read on to find out how! 
 
