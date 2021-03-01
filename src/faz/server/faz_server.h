@@ -1,3 +1,6 @@
+#ifndef FAZ_SERVER_
+#define FAZ_SERVER_
+
 #include "faz.grpc.pb.h"
 
 #include <unordered_map>
@@ -30,7 +33,10 @@ public:
   // Initialize this to set up the KeyValueClient
   // which we will use to communicate with the server
   // side logic of the keyvaluestore
-  FazServiceImpl();
+  FazServiceImpl() : 
+  kvstore_(grpc::CreateChannel("localhost:50001", grpc::InsecureChannelCredentials())),
+  caw_functions_({{"registeruser", RegisterUser}, {"caw", PostCaw}, {"read", ReadCaw},
+    {"follow", FollowUser}, {"profile", GetProfile}}) {}
 
   // This function 'hooks' a function that can
   // then be called for use by the Faz client
@@ -68,7 +74,7 @@ private:
   // This is a string -> function mapping of
   // caw functions.
   std::unordered_map<std::string, std::function<Status(
-                                      Any &, Any &, KeyValueStoreInterface &)>>
+                                  const Any &, Any &, KeyValueStoreInterface &)>>
       caw_functions_;
   // This is an int to string mapping of hooked functions
   // We will register an event type with a string that will
@@ -79,3 +85,4 @@ private:
   // to store function data
   KeyValueStoreClient kvstore_;
 };
+#endif

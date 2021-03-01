@@ -101,7 +101,6 @@ Status PostCaw(const Any &EventRequest, Any &EventReply,
     if (request.parent_id() != "") {
       kvstore.Put("caw_" + request.parent_id() + "_children", currentCawId);
     }
-
     // We will return this caw
     response.set_allocated_caw(currentCaw);
     status = Status::OK;

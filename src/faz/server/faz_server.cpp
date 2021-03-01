@@ -1,19 +1,5 @@
 #include "faz_server.h"
 
-FazServiceImpl::FazServiceImpl() {
-  // Initializing the kvstore client to connect
-  // with its backend over grpc
-  std::string target_str = "localhost:50001";
-  kvstore_(grpc::CreateChannel(target_str, grpc::InsecureChannelCredentials()));
-  // Initializing caw_functions_ to store the function
-  // data
-  caw_functions_["registeruser"] = RegisterUser;
-  caw_functions_["caw"] = PostCaw;
-  caw_functions_["read"] = ReadCaw;
-  caw_functions_["follow"] = FollowUser;
-  caw_functions_["profile"] = GetProfile;
-}
-
 Status FazServiceImpl::hook(ServerContext *context, const HookRequest *request,
                             HookReply *response) {
   int eventType = request->event_type();
@@ -60,7 +46,9 @@ Status FazServiceImpl::event(ServerContext *context,
     // the Any objects.
     // We pass the object by reference, mutable_payload() returns
     // the pointer so we dereference it before passing it in.
-    status = caw_functions_[functionName](
+    std::function<Status(const Any &, Any &, KeyValueStoreInterface &)> eventFunction; 
+    eventFunction = caw_functions_[functionName];
+    status = eventFunction(
         request->payload(), *(response->mutable_payload()), kvstore_);
   }
   return status;

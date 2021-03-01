@@ -1,3 +1,6 @@
+#ifndef KEY_VALUE_STORE_SERVER_
+#define KEY_VALUE_STORE_SERVER_
+
 #include <grpcpp/grpcpp.h>
 
 #include "store.grpc.pb.h"
@@ -53,3 +56,4 @@ private:
   // Local variable from core class
   KeyValueStore store_;
 };
+#endif

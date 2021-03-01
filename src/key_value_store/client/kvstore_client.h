@@ -1,3 +1,6 @@
+#ifndef KEY_VALUE_STORE_CLIENT_
+#define KEY_VALUE_STORE_CLIENT_
+
 #include "../KeyValueStoreInterface.h"
 
 #include "store.grpc.pb.h"
@@ -28,7 +31,7 @@ public:
   // This is a constructor that takes in a channel instance
   // This channel is used to connect to the backend
   KeyValueStoreClient(const std::shared_ptr<Channel> &channel)
-      : stub_(KeyValueStore::NewStub(channel)){};
+      : stub_(kvstore::KeyValueStore::NewStub(channel)){};
   // Performs normal put functionality
   // Args: Key, Value pair to store in kvstore
   // Returns: boolean indicating success/failure
@@ -46,3 +49,4 @@ private:
   // A connection to our grpc server
   std::unique_ptr<kvstore::KeyValueStore::Stub> stub_;
 };
+#endif

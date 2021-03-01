@@ -1,3 +1,6 @@
+#ifndef CAW_FUNCTIONS_
+#define CAW_FUNCTIONS_
+
 #include "caw.pb.h"
 #include <google/protobuf/any.pb.h>
 #include <grpcpp/grpcpp.h>
@@ -72,3 +75,4 @@ Status FollowUser(const Any &EventRequest, Any &EventReply,
 // Returns: Status indicating success / error message
 Status GetProfile(const Any &EventRequest, Any &EventReply,
                   KeyValueStoreInterface &kvstore);
+#endif

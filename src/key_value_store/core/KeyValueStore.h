@@ -1,3 +1,6 @@
+#ifndef KEY_VALUE_STORE_
+#define KEY_VALUE_STORE_
+
 #include "../KeyValueStoreInterface.h"
 
 #include <mutex>
@@ -36,3 +39,4 @@ private:
   // of our key value store
   std::mutex lock_;
 };
+#endif
