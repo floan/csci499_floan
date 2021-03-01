@@ -63,9 +63,10 @@ add_custom_command(
       ARGS --grpc_out "${CMAKE_CURRENT_BINARY_DIR}"
         --cpp_out "${CMAKE_CURRENT_BINARY_DIR}"
         -I "${store_proto_path}"
+        -I "${CMAKE_CURRENT_BINARY_DIR}/_deps/grpc-src/third_party/protobuf/src"
         --plugin=protoc-gen-grpc="${_GRPC_CPP_PLUGIN_EXECUTABLE}"
         "${store_proto}"
-      DEPENDS "${store_proto}" "build/_deps/protobuf-src/src/google/protobuf/any.proto")
+      DEPENDS "${store_proto}")
 
 ####################### GRPC SETUP FOR KVSTORE END ############################
 
@@ -86,7 +87,7 @@ add_custom_command(
       ARGS --grpc_out "${CMAKE_CURRENT_BINARY_DIR}"
         --cpp_out "${CMAKE_CURRENT_BINARY_DIR}"
         -I "${faz_proto_path}"
-        -I "${CMAKE_CURRENT_BINARY_DIR}/_deps/protobuf-src/src"
+        -I "${CMAKE_CURRENT_BINARY_DIR}/_deps/grpc-src/third_party/protobuf/src"
         --plugin=protoc-gen-grpc="${_GRPC_CPP_PLUGIN_EXECUTABLE}"
         "${faz_proto}"
       DEPENDS "${faz_proto}")
@@ -108,7 +109,7 @@ add_custom_command(
       COMMAND ${_PROTOBUF_PROTOC}
       ARGS --cpp_out "${CMAKE_CURRENT_BINARY_DIR}"
         -I "${caw_proto_path}"
-        -I "${CMAKE_CURRENT_BINARY_DIR}/_deps/protobuf-src/src"
+        -I "${CMAKE_CURRENT_BINARY_DIR}/_deps/grpc-src/third_party/protobuf/src"
         --plugin=protoc-gen-grpc="${_GRPC_CPP_PLUGIN_EXECUTABLE}"
         "${caw_proto}"
       DEPENDS "${caw_proto}")
