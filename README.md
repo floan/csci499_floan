@@ -77,17 +77,17 @@ Here is a list of all of Caws features!
 
 Caw is designed to allow the user to interract with it through the command line. All commands should be run within the build folder. Please read on to learn more about the commands and how to use them! 
 
-1. Initially all functions will need to be hooked to our Faz service. In order to do this, run the command `./caw --hookall`. You can also unhook all functions by running `./caw --unhookall`. If you want more flexibility, you can also use `./caw hook <function name>` and `./caw unhook <function name>`. Once all functions are hooked, you can start using them! 
+1. Initially all functions will need to be hooked to our Faz service. In order to do this, run the command `./caw --hookall`. You can also unhook all functions by running `./caw --unhookall`. If you want more flexibility, you can also use `./caw --hook <function name>` and `./caw --unhook <function name>`. Once all functions are hooked, you can start using them! 
 
 2. In order to register a user, you must specify the username with our `--registeruser` flag. Here is an example: `./caw --registeruser "fayez"`
 
-3. In order to post a caw, you must specify the user posting, and the text to post! Here is an example: `./caw --user "fayez" --caw "Hello World!"` Please remember that only registered users can post caws! 
+3. In order to post a caw, you must specify the user posting, and the text to post! You can specify the text to post using our `--caw` flag. Here is an example: `./caw --user "fayez" --caw "Hello World!"` Please remember that only registered users can post caws! 
 
-4. In order to reply to a caw, you must specify the user replying, the caw to reply to and the text with which the user wants to reply! Here is an example: `./caw --user "fayez" --reply 1 --caw "Hi Fayez! From the world."`
+4. In order to reply to a caw, you must specify the user replying, the caw to reply to and the text with which the user wants to reply! You can specify the caw id to reply to using our `--reply` flag. Here is an example: `./caw --user "fayez" --reply 1 --caw "Hi Fayez! From the world."`
 
 5. In order to follow a caw, you must specify your username and the username of who you wish to follow! Here is an example: `./caw --user "fayez" --follow "Adam"`. Please note, you can only follow registered users!
 
-6. In order to read a caw thread, you must specify your username and the thread id which you wish to begin reading from. Here is an example: `./caw --user "fayez" --read 1`.
+6. In order to read a caw thread, you must specify your username and the thread id which you wish to begin reading from. You can specify the caw id to start reading from using our `--read` flag. Here is an example: `./caw --user "fayez" --read 1`.
 
 7. In order to display a profile, you must specify the username of the profile you wish to see! Here is an example: `./caw --user "fayez" --profile`.
 
