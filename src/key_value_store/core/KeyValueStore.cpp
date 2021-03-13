@@ -40,3 +40,12 @@ bool KeyValueStore::Remove(const std::string &key) {
   result = kv_store_.erase(key);
   return result;
 }
+
+std::vector<std::pair<std::string, std::vector<std::string>>> KeyValueStore::GetAllEntries() {
+  std::vector<std::pair<std::string, std::vector<std::string>>> toReturn; 
+  const std::lock_guard<std::mutex> lock(lock_);
+  for (std::pair<std::string, std::vector<std::string>> pair : kv_store_) {
+    toReturn.push_back(pair);
+  }
+  return toReturn;
+}

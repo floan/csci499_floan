@@ -30,6 +30,10 @@ class KeyValueStore : public KeyValueStoreInterface {
   // Args: Key to remove from kvstore
   // Returns: boolean indicating success/failure
   bool Remove(const std::string &key);
+  // Returns all the keyvalue pairs in this table
+  // Args: None
+  // Returns: A vector of keyvalue pairs
+  std::vector<std::pair<std::string, std::vector<std::string>>> GetAllEntries();
 
  private:
   // This is the underlying data structure
