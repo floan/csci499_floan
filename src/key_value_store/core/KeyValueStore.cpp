@@ -44,8 +44,16 @@ bool KeyValueStore::Remove(const std::string &key) {
 std::vector<std::pair<std::string, std::vector<std::string>>> KeyValueStore::GetAllEntries() {
   std::vector<std::pair<std::string, std::vector<std::string>>> toReturn; 
   const std::lock_guard<std::mutex> lock(lock_);
-  for (std::pair<std::string, std::vector<std::string>> pair : kv_store_) {
+  for (const std::pair<std::string, std::vector<std::string>>& pair : kv_store_) {
     toReturn.push_back(pair);
   }
   return toReturn;
+}
+
+void KeyValueStore::LoadAllEntries(std::vector<std::pair<std::string, std::vector<std::string>>> kvpairs) {
+  const std::lock_guard<std::mutex> lock(lock_);
+  for (const std::pair<std::string, std::vector<std::string>>& p : kvpairs) {
+    kv_store_[p.first] = p.second;
+  }
+  // All pairs have been stored into the kv_store_ obj
 }

@@ -34,6 +34,10 @@ class KeyValueStore : public KeyValueStoreInterface {
   // Args: None
   // Returns: A vector of keyvalue pairs
   std::vector<std::pair<std::string, std::vector<std::string>>> GetAllEntries();
+  // Stores all the keyvalue pairs into the table
+  // Args: Vector containing keyvalue pairs
+  // Returns: None
+  void LoadAllEntries(std::vector<std::pair<std::string, std::vector<std::string>>> kvpairs);
 
  private:
   // This is the underlying data structure

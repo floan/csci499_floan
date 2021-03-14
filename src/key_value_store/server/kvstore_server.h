@@ -67,11 +67,15 @@ class KeyValueStoreImpl final : public kvstore::KeyValueStore::Service {
   // This function is responsible for saving
   // Data to the file specified by filename (local variable)
   // Each time a put or remove request is performed
+  // Args: None
+  // Returns: GRPC Status to signify success or failure
   Status storeDataToFile();
 
   // This function is responsible for loading
   // Data from the file each time the server is started
-  Status loadDataFromFile(); 
+  // Args: None
+  // Returns: None
+  void loadDataFromFile(); 
 
   // Local variable from core class
   KeyValueStore store_;
