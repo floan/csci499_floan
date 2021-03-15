@@ -5,13 +5,12 @@
 #include <gflags/gflags.h>
 #include <glog/logging.h>
 #include <grpcpp/grpcpp.h>
-#include <gflags/gflags.h>
 
 DEFINE_string(store, "", "Filename to store/load data");
 
 void RunServer() {
   std::string server_address("0.0.0.0:50001");
-  KeyValueStoreImpl* service;
+  KeyValueStoreImpl *service;
   if (FLAGS_store != "") {
     service = new KeyValueStoreImpl(FLAGS_store);
   } else {

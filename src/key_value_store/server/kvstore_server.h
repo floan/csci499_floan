@@ -21,17 +21,17 @@ using grpc::StatusCode;
 
 using kvstore::GetReply;
 using kvstore::GetRequest;
+using kvstore::kvstorePair;
+using kvstore::kvstoreSnapshot;
 using kvstore::PutReply;
 using kvstore::PutRequest;
 using kvstore::RemoveReply;
 using kvstore::RemoveRequest;
-using kvstore::kvstorePair;
-using kvstore::kvstoreSnapshot;
 
 // This class implements the server side
 // functionality of the key value store
 class KeyValueStoreImpl final : public kvstore::KeyValueStore::Service {
- public:
+public:
   KeyValueStoreImpl() : store_(), filename_(""){};
   // This constructor is called when a filename is provided
   KeyValueStoreImpl(std::string filename);
@@ -61,7 +61,7 @@ class KeyValueStoreImpl final : public kvstore::KeyValueStore::Service {
   Status remove(ServerContext *context, const RemoveRequest *request,
                 RemoveReply *response) override;
 
- private:
+private:
   // Local helper function
 
   // This function is responsible for saving
@@ -75,11 +75,11 @@ class KeyValueStoreImpl final : public kvstore::KeyValueStore::Service {
   // Data from the file each time the server is started
   // Args: None
   // Returns: None
-  void loadDataFromFile(); 
+  void loadDataFromFile();
 
   // Local variable from core class
   KeyValueStore store_;
-  // This variable stores the filename 
+  // This variable stores the filename
   // to store kvstore data into
   // if no filename is specified it will be empty
   std::string filename_;

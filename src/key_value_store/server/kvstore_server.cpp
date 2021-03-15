@@ -6,10 +6,10 @@ KeyValueStoreImpl::KeyValueStoreImpl(std::string filename) {
   filename_ = filename;
   std::ifstream ifile(filename_);
   if (ifile.fail()) {
-    // If file does not exist 
-    // Then it is a new file to be 
+    // If file does not exist
+    // Then it is a new file to be
     // created and we want to store data to it
-    // ofstream will create a non existing file 
+    // ofstream will create a non existing file
     // automatically
   } else {
     ifile.close();
@@ -46,7 +46,7 @@ KeyValueStoreImpl::get(ServerContext *context,
 Status KeyValueStoreImpl::remove(ServerContext *context,
                                  const RemoveRequest *request,
                                  RemoveReply *response) {
-  Status status; 
+  Status status;
   bool removeSuccessBool = store_.Remove(request->key());
   if (removeSuccessBool) {
     status = storeDataToFile();
@@ -65,20 +65,21 @@ Status KeyValueStoreImpl::storeDataToFile() {
     LOG(INFO) << "No filename specified so cannot save to file";
     status = Status::OK;
   } else if (ofile.fail()) {
-    status = Status(StatusCode::UNKNOWN, "There was a failure in opening to output file");
+    status = Status(StatusCode::UNKNOWN,
+                    "There was a failure in opening to output file");
     LOG(ERROR) << "Failure in opening output file";
   } else {
-    kvstoreSnapshot snapshot; 
-    // Iterate over every pair and store it 
-    // in a protobuf message 
+    kvstoreSnapshot snapshot;
+    // Iterate over every pair and store it
+    // in a protobuf message
     // store that in a wrapper message (kvstoreSnapshot)
     // to then store to a file
     std::vector<std::pair<std::string, std::vector<std::string>>> allPairs;
     allPairs = store_.GetAllEntries();
     for (std::pair<std::string, std::vector<std::string>> p : allPairs) {
-      kvstorePair pair; 
+      kvstorePair pair;
       pair.set_key(p.first);
-      // Iterate over each value string 
+      // Iterate over each value string
       // and store it in the pair message
       for (std::string value : p.second) {
         *pair.add_values() = value;
@@ -86,31 +87,31 @@ Status KeyValueStoreImpl::storeDataToFile() {
       // Now store the pair message to the snapshot
       snapshot.add_pairs()->CopyFrom(pair);
     }
-    // All the kvstorePairs are now stored in the 
+    // All the kvstorePairs are now stored in the
     // kvstoreSnapshot. Now we will store to file
     bool serializeSuccessBool = snapshot.SerializeToOstream(&ofile);
     if (serializeSuccessBool) {
       status = Status::OK;
     } else {
-      status = Status(StatusCode::UNKNOWN, "There was a failure in storing to the file");
+      status = Status(StatusCode::UNKNOWN,
+                      "There was a failure in storing to the file");
     }
     ofile.close();
   }
   return status;
 }
 
-
 void KeyValueStoreImpl::loadDataFromFile() {
   // Have already checked file validity in constructor
   LOG(INFO) << "Loading Data From File";
   std::ifstream ifile(filename_);
   kvstoreSnapshot snapshot;
-  // Parses the data from file 
+  // Parses the data from file
   snapshot.ParseFromIstream(&ifile);
   std::vector<std::pair<std::string, std::vector<std::string>>> toReturn;
   // Creating a pair object for each kvstorePair
   for (const kvstorePair &p : snapshot.pairs()) {
-    std::pair<std::string, std::vector<std::string>> pair; 
+    std::pair<std::string, std::vector<std::string>> pair;
     pair.first = p.key();
     // Creating a values vector for each "repeated values"
     for (const std::string val : p.values()) {
@@ -118,6 +119,6 @@ void KeyValueStoreImpl::loadDataFromFile() {
     }
     toReturn.push_back(pair);
   }
-  // toReturn is populated with pairs 
+  // toReturn is populated with pairs
   store_.LoadAllEntries(toReturn);
 }
