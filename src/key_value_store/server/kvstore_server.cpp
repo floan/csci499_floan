@@ -88,7 +88,9 @@ Status KeyValueStoreImpl::storeDataToFile() {
       snapshot.add_pairs()->CopyFrom(pair);
     }
     // All the kvstorePairs are now stored in the
-    // kvstoreSnapshot. Now we will store to file
+    // kvstoreSnapshot. We will aquire a lock 
+    // and store to file.
+    const std::lock_guard<std::mutex> lock(lock_);
     bool serializeSuccessBool = snapshot.SerializeToOstream(&ofile);
     if (serializeSuccessBool) {
       status = Status::OK;

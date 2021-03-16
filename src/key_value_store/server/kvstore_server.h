@@ -6,6 +6,8 @@
 
 #include <fstream>
 
+#include <mutex>
+
 #include <glog/logging.h>
 #include <google/protobuf/any.pb.h>
 #include <grpcpp/grpcpp.h>
@@ -83,5 +85,8 @@ private:
   // to store kvstore data into
   // if no filename is specified it will be empty
   std::string filename_;
+  // Lock enables thread safe operation
+  // of storing to output file
+  std::mutex lock_;
 };
 #endif
