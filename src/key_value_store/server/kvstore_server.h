@@ -34,9 +34,12 @@ using kvstore::RemoveRequest;
 // functionality of the key value store
 class KeyValueStoreImpl final : public kvstore::KeyValueStore::Service {
 public:
-  KeyValueStoreImpl() : store_(), filename_(""){};
+  KeyValueStoreImpl() : store_(), filename_("") {};
   // This constructor is called when a filename is provided
   KeyValueStoreImpl(std::string filename);
+  // This destructor is used to save data to a file 
+  // before the serverice is deleted
+  ~KeyValueStoreImpl() { storeDataToFile(); }
   // This function performs normal put functionality
   // by unwrapping protobuf messages
   // Args: Context (for additional grpc info),
@@ -62,9 +65,8 @@ public:
   // Returns: GRPC Status indicating success/error
   Status remove(ServerContext *context, const RemoveRequest *request,
                 RemoveReply *response) override;
-
 private:
-  // Local helper function
+  // Local helper functions
 
   // This function is responsible for saving
   // Data to the file specified by filename (local variable)
@@ -72,7 +74,6 @@ private:
   // Args: None
   // Returns: GRPC Status to signify success or failure
   Status storeDataToFile();
-
   // This function is responsible for loading
   // Data from the file each time the server is started
   // Args: None

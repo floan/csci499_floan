@@ -21,7 +21,7 @@ Status KeyValueStoreImpl::put(ServerContext *context, const PutRequest *request,
                               PutReply *response) {
   bool putSuccessBool = store_.Put(request->key(), request->value());
   if (putSuccessBool) {
-    return storeDataToFile();
+    return Status::OK;
   } else {
     return Status(StatusCode::UNKNOWN, "Sorry your operation failed");
   }
@@ -49,7 +49,7 @@ Status KeyValueStoreImpl::remove(ServerContext *context,
   Status status;
   bool removeSuccessBool = store_.Remove(request->key());
   if (removeSuccessBool) {
-    status = storeDataToFile();
+    status = Status::OK;
   } else {
     status = Status(StatusCode::NOT_FOUND, "The key to remove was not found");
   }
@@ -98,6 +98,7 @@ Status KeyValueStoreImpl::storeDataToFile() {
       status = Status(StatusCode::UNKNOWN,
                       "There was a failure in storing to the file");
     }
+    ofile.flush();
     ofile.close();
   }
   return status;
