@@ -76,12 +76,12 @@ Status KeyValueStoreImpl::storeDataToFile() {
     // to then store to a file
     std::vector<std::pair<std::string, std::vector<std::string>>> allPairs;
     allPairs = store_.GetAllEntries();
-    for (std::pair<std::string, std::vector<std::string>> p : allPairs) {
+    for (const std::pair<std::string, std::vector<std::string>> &p : allPairs) {
       kvstorePair pair;
       pair.set_key(p.first);
       // Iterate over each value string
       // and store it in the pair message
-      for (std::string value : p.second) {
+      for (const std::string &value : p.second) {
         *pair.add_values() = value;
       }
       // Now store the pair message to the snapshot
@@ -117,7 +117,7 @@ void KeyValueStoreImpl::loadDataFromFile() {
     std::pair<std::string, std::vector<std::string>> pair;
     pair.first = p.key();
     // Creating a values vector for each "repeated values"
-    for (const std::string val : p.values()) {
+    for (const std::string &val : p.values()) {
       pair.second.push_back(val);
     }
     toReturn.push_back(pair);

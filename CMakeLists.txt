@@ -156,3 +156,6 @@ target_link_libraries(kv_store_test gtest gtest_main)
 
 add_executable(caw_test tests/CawFunctionTests.cpp src/key_value_store/core/KeyValueStore.cpp src/caw/functions/caw_functions.cpp ${caw_proto_srcs})
 target_link_libraries(caw_test ${_GRPC_GRPCPP} ${_PROTOBUF_LIBPROTOBUF} gtest gtest_main glog::glog)
+
+add_executable(kv_store_persistence_test tests/KeyValueStorePersistenceTests.cpp ${kvstore_dir}/core/KeyValueStore.cpp)
+target_link_libraries(kv_store_persistence_test gtest gtest_main)
