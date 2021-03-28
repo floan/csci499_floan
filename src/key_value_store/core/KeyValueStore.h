@@ -11,6 +11,12 @@
 // Alias for the unorderedList
 typedef std::unordered_map<std::string, std::vector<std::string>> hashMap;
 
+// Alias for a vector of kvstore pairs. Each pair has a string (key)
+// and a vector of strings (value). 
+typedef std::vector<
+          std::pair<std::string, std::vector<std::string>>
+        > kvstorePairs;
+
 // This class is implements our core key value
 // store functionality
 class KeyValueStore : public KeyValueStoreInterface {
@@ -33,12 +39,11 @@ public:
   // Returns all the keyvalue pairs in this table
   // Args: None
   // Returns: A vector of keyvalue pairs
-  std::vector<std::pair<std::string, std::vector<std::string>>> GetAllEntries();
+  kvstorePairs GetAllEntries();
   // Stores all the keyvalue pairs into the table
   // Args: Vector containing keyvalue pairs
   // Returns: None
-  void LoadAllEntries(
-      std::vector<std::pair<std::string, std::vector<std::string>>> kvpairs);
+  void LoadAllEntries(kvstorePairs kvpairs);
 
 private:
   // This is the underlying data structure

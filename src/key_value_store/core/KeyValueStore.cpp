@@ -5,9 +5,6 @@
 #include <unordered_map>
 #include <vector>
 
-// Alias for the unorderedList
-typedef std::unordered_map<std::string, std::vector<std::string>> hashMap;
-
 bool KeyValueStore::Put(const std::string &key, const std::string &value) {
   bool result;
   const std::lock_guard<std::mutex> lock(lock_);
@@ -41,9 +38,8 @@ bool KeyValueStore::Remove(const std::string &key) {
   return result;
 }
 
-std::vector<std::pair<std::string, std::vector<std::string>>>
-KeyValueStore::GetAllEntries() {
-  std::vector<std::pair<std::string, std::vector<std::string>>> toReturn;
+kvstorePairs KeyValueStore::GetAllEntries() {
+  kvstorePairs toReturn;
   const std::lock_guard<std::mutex> lock(lock_);
   for (const std::pair<std::string, std::vector<std::string>> &pair :
        kv_store_) {
@@ -53,7 +49,7 @@ KeyValueStore::GetAllEntries() {
 }
 
 void KeyValueStore::LoadAllEntries(
-    std::vector<std::pair<std::string, std::vector<std::string>>> kvpairs) {
+    kvstorePairs kvpairs) {
   const std::lock_guard<std::mutex> lock(lock_);
   for (const std::pair<std::string, std::vector<std::string>> &p : kvpairs) {
     kv_store_[p.first] = p.second;

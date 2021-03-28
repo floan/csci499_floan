@@ -5,16 +5,15 @@
 KeyValueStoreImpl::KeyValueStoreImpl(std::string filename) {
   filename_ = filename;
   std::ifstream ifile(filename_);
-  if (ifile.fail()) {
-    // If file does not exist
-    // Then it is a new file to be
-    // created and we want to store data to it
-    // ofstream will create a non existing file
-    // automatically
-  } else {
+  if (!ifile.fail()) {
     ifile.close();
     loadDataFromFile();
   }
+  // If file does not exist
+  // Then it is a new file to be
+  // created and we want to store data to it
+  // ofstream will create a non existing file
+  // automatically
 }
 
 Status KeyValueStoreImpl::put(ServerContext *context, const PutRequest *request,
