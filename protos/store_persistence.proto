@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package kvstore;
+
+message kvstorePair {
+  bytes key = 1;
+  repeated bytes values = 2;
+}
+
+message kvstoreSnapshot {
+  repeated kvstorePair pairs = 1;
+}

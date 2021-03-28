@@ -116,12 +116,33 @@ add_custom_command(
 
 ######################### GRPC SETUP FOR CAW END #############################
 
+###################   GRPC SETUP FOR KVSTORE PERSIST   #######################
+
+get_filename_component(kvstore_persist "protos/store_persistence.proto" ABSOLUTE)
+get_filename_component(kvstore_persist_path "${kvstore_persist}" PATH)
+
+# Generated sources
+set(kvstore_persist_srcs "${CMAKE_CURRENT_BINARY_DIR}/store_persistence.pb.cc")
+set(kvstore_persist_hdrs "${CMAKE_CURRENT_BINARY_DIR}/store_persistence.pb.h")
+
+add_custom_command(
+      OUTPUT "${kvstore_persist_srcs}" "${kvstore_persist_hdrs}"
+      COMMAND ${_PROTOBUF_PROTOC}
+      ARGS --cpp_out "${CMAKE_CURRENT_BINARY_DIR}"
+        -I "${kvstore_persist_path}"
+        -I "${CMAKE_CURRENT_BINARY_DIR}/_deps/grpc-src/third_party/protobuf/src"
+        --plugin=protoc-gen-grpc="${_GRPC_CPP_PLUGIN_EXECUTABLE}"
+        "${kvstore_persist}"
+      DEPENDS "${kvstore_persist}")
+
+################### GRPC SETUP FOR KVSTORE PERSIST END #####################
+
 # Include generated *.pb.h files
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
 set(kvstore_dir src/key_value_store/)
 
-add_executable(kv_store src/key_value_store/kv_store.cpp ${kvstore_dir}/server/kvstore_server.cpp ${kvstore_dir}/core/KeyValueStore.cpp ${store_proto_srcs} ${store_grpc_srcs})
+add_executable(kv_store src/key_value_store/kv_store.cpp ${kvstore_dir}/server/kvstore_server.cpp ${kvstore_dir}/core/KeyValueStore.cpp ${store_proto_srcs} ${store_grpc_srcs} ${kvstore_persist_srcs})
 target_link_libraries(kv_store ${_GRPC_GRPCPP} ${_PROTOBUF_LIBPROTOBUF} gflags::gflags glog::glog)
 
 add_executable(faz src/faz/faz.cpp src/faz/server/faz_server.cpp src/faz/client/faz_client.cpp src/caw/functions/caw_functions.cpp ${kvstore_dir}/client/kvstore_client.cpp ${store_proto_srcs} ${store_grpc_srcs} ${caw_proto_srcs} ${caw_grpc_srcs} ${faz_proto_srcs} ${faz_grpc_srcs})
@@ -135,3 +156,6 @@ target_link_libraries(kv_store_test gtest gtest_main)
 
 add_executable(caw_test tests/CawFunctionTests.cpp src/key_value_store/core/KeyValueStore.cpp src/caw/functions/caw_functions.cpp ${caw_proto_srcs})
 target_link_libraries(caw_test ${_GRPC_GRPCPP} ${_PROTOBUF_LIBPROTOBUF} gtest gtest_main glog::glog)
+
+add_executable(kv_store_persistence_test tests/KeyValueStorePersistenceTests.cpp ${kvstore_dir}/core/KeyValueStore.cpp)
+target_link_libraries(kv_store_persistence_test gtest gtest_main)
