@@ -1,27 +1,30 @@
 package faz_client
 
 import (
-	"context"
 	"log"
 	"os"
+	"fmt"
 
-	faz "include path to faz proto"
+	"github.com/golang/protobuf/ptypes/any"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
 
-
+	faz "github.com/floan/csci499_floan/protos/go_protos/faz"
 )
 
 type FazClient struct {
-	stub_ FazServiceClient
-	conn_ *ClientConn
+	stub_ faz.FazServiceClient
+	conn_ *grpc.ClientConn
 }
 
 // This function acts as a constructor 
 // and initializes the member variables 
 // of the FazClient struct
-func CreateFazClient(address string) FazClient {
+func CreateFazClient(address string) *FazClient {
 	// Set up a connection to the server.
-	fazClient := FazClient{}
-	fazClient.conn_, err := grpc.Dial(address, grpc.WithInsecure())
+	fazClient := &FazClient{}
+	conn, err := grpc.Dial(address, grpc.WithInsecure())
+	fazClient.conn_ = conn
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 		os.Exit(1)
@@ -44,13 +47,14 @@ func (fazClient *FazClient) DestroyFazClient() {
 // Args: A request and response of protobuf Any type. These
 //       represent the input and output from our registered function
 // Returns: A boolean indicating success / failure
-func (fazClient *FazClient) Event(request *anypb.Any, 
-																	response *anypb.Any,
+func (fazClient *FazClient) Event(request *any.Any, 
+																	response *any.Any,
 																	eventType int) bool {
 	eventRequest := faz.EventRequest{
-		EventType: eventType, 
+		EventType: int32(eventType), 
 		Payload: request,
 	}
+	fmt.Println(eventRequest)
 	eventResponse, err := fazClient.stub_.Event(context.Background(), &eventRequest)
 	if err != nil {
 		log.Fatalf("could not perform event: %v", err)
@@ -59,6 +63,7 @@ func (fazClient *FazClient) Event(request *anypb.Any,
 		// Setting the Any payload in eventResponse to
 		// our Any response variable
 		response = eventResponse.GetPayload()
+		fmt.Println(eventResponse)
 		return true
 	}
 }
@@ -71,10 +76,10 @@ func (fazClient *FazClient) Event(request *anypb.Any,
 func (fazClient *FazClient) HookFunction(eventType int,
 																				 functionName string) bool {
 	hookRequest := faz.HookRequest{
-		EventType: eventType,
+		EventType: int32(eventType),
 		EventFunction: functionName,
 	}
-	hookResponse, err := fazClient.stub_.Hook(context.Background(), &hookRequest)
+	_, err := fazClient.stub_.Hook(context.Background(), &hookRequest)
 	if err != nil {
 		log.Fatalf("could not hook function: %v", err)
 		return false
@@ -90,9 +95,9 @@ func (fazClient *FazClient) HookFunction(eventType int,
 // Returns: A boolean indicating success / failure
 func (fazClient *FazClient) UnhookFunction(eventType int) bool {
 	unhookRequest := faz.UnhookRequest{
-		EventType: eventType,
+		EventType: int32(eventType),
 	}
-	unhookResponse, err := fazClient.stub_.Unhook(context.Background(), &unhookRequest)
+	_, err := fazClient.stub_.Unhook(context.Background(), &unhookRequest)
 	if err != nil {
 		log.Fatalf("could not unhook function: %v", err)
 		return false

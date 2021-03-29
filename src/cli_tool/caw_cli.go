@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
+	caw "github.com/floan/csci499_floan/src/caw/client/go_client"
 )
 
 // Defining command line flags
@@ -58,5 +60,8 @@ func main() {
 		os.Exit(1)
 	}
 
+	client := caw.CreateCawClient()
+	client.GetProfile(*userPtr)
+	client.RegisterUser("Firas")
 
 }

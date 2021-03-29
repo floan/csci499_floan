@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+option go_package = "github.com/floan/csci499_floan/protos/go_protos/caw";
+
 package caw;
 
 // Time as given by Linux gettimeofday().

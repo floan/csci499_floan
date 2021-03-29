@@ -3,18 +3,25 @@ package caw_client
 import (
 	"fmt"
 
+	"github.com/golang/protobuf/proto"
+	"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes/any"
+
+	faz "github.com/floan/csci499_floan/src/faz/client/go_client"
+
+	caw "github.com/floan/csci499_floan/protos/go_protos/caw"
 )
 
 type CawClient struct {
 	functionToEventType_ map[string]int
-	client_ FazClient
+	client_ *faz.FazClient
 }
 
 // This function acts as a constructor 
 // and initializes the member variables 
 // of the CawClient struct
-func CreateCawClient() CawClient {
-	cawClient := CawClient{}
+func CreateCawClient() *CawClient {
+	cawClient := &CawClient{}
 	cawClient.functionToEventType_ = map[string]int{
 		"registeruser": 1,
 		"caw": 2,
@@ -22,7 +29,7 @@ func CreateCawClient() CawClient {
 		"follow": 4,
 		"profile": 5,
 	}
-	cawClient.client_ := CreateFazClient("localhost:50000")
+	cawClient.client_ = faz.CreateFazClient("localhost:50000")
 
 	return cawClient
 }
@@ -31,12 +38,12 @@ func (cawClient *CawClient) RegisterUser(username string) bool {
 	registerRequest := caw.RegisteruserRequest{
 		Username: username,
 	}
-	anyRequest, errPacking := ptypes.MarshalAny(registerRequest)
+	anyRequest, errPacking := ptypes.MarshalAny(proto.Message(&registerRequest))
 	if errPacking != nil {
 		fmt.Println(errPacking.Error())
 		return false
 	}
-	var anyResponse = new(anypb.Any)
+	var anyResponse = new(any.Any)
 	registerSuccessBool := cawClient.client_.Event(anyRequest, anyResponse, 
 													cawClient.functionToEventType_["registeruser"])
 	// No need to unpack the response for Registeruser
@@ -58,20 +65,20 @@ func (cawClient *CawClient) PostCaw(username string,
 	// a brand new caw
 	if parent_id != -1 {
 		cawRequest = caw.CawRequest{ Username: username, Text: text, 
-																 ParentId: parent_id }
+																 ParentId: []byte(string(parent_id)) }
 	} else {
 		cawRequest = caw.CawRequest{ Username: username, Text: text }
 	}
 
-	anyRequest, errPacking := ptypes.MarshalAny(cawRequest)
+	anyRequest, errPacking := ptypes.MarshalAny(proto.Message(&cawRequest))
 	if errPacking != nil {
-		panic(err)
+		panic(errPacking)
 	}
-	var anyResponse = new(anypb.Any)
+	var anyResponse = new(any.Any)
 	cawSuccessBool := cawClient.client_.Event(anyRequest, anyResponse,
 													cawClient.functionToEventType_["caw"])
 	if cawSuccessBool {
-		var cawResponse = new(Caw.CawReply)
+		var cawResponse = new(caw.CawReply)
 		errUnpacking := ptypes.UnmarshalAny(anyResponse, cawResponse)
 		if errUnpacking != nil {
 			fmt.Println(errUnpacking.Error())
@@ -84,8 +91,7 @@ func (cawClient *CawClient) PostCaw(username string,
 			fmt.Printf("\t Text: %s", caw.Text)
 			fmt.Printf("\t Id: %d", caw.Id)
 			fmt.Printf("\t Parent_Id: %d", caw.ParentId)
-			// TODO: CHECK AND FIX THIS
-			fmt.Printf("\t Time created: %d", caw.Timestamp)
+			fmt.Printf("\t Time created: %d", caw.Timestamp.Seconds)
 			return true
 		}
 	} else {
@@ -99,12 +105,12 @@ func (cawClient *CawClient) FollowUser(username string,
 		Username: username,
 		ToFollow: to_follow,
 	}
-	anyRequest, errPacking := ptypes.MarshalAny(followRequest)
+	anyRequest, errPacking := ptypes.MarshalAny(proto.Message(&followRequest))
 	if errPacking != nil {
 		fmt.Println(errPacking.Error())
 		return false
 	}
-	var anyResponse = new(anypb.Any)
+	var anyResponse = new(any.Any)
 	followSuccessBool := cawClient.client_.Event(anyRequest, anyResponse,
 												cawClient.functionToEventType_["follow"])
 	if followSuccessBool {
@@ -121,14 +127,14 @@ func (cawClient *CawClient) FollowUser(username string,
 
 func (cawClient *CawClient) ReadCaw(caw_id int) bool {
 	readRequest := caw.ReadRequest{
-		CawId: caw_id,
+		CawId: []byte(string(caw_id)),
 	}
-	anyRequest, errPacking := ptypes.MarshalAny(readRequest)
+	anyRequest, errPacking := ptypes.MarshalAny(proto.Message(&readRequest))
 	if errPacking != nil {
 		fmt.Println(errPacking.Error())
 		return false
 	}
-	var anyResponse = new(anypb.Any)
+	var anyResponse = new(any.Any)
 	readSuccessBool := cawClient.client_.Event(anyRequest, anyResponse,
 											cawClient.functionToEventType_["read"])
 	if readSuccessBool {
@@ -138,17 +144,17 @@ func (cawClient *CawClient) ReadCaw(caw_id int) bool {
 			fmt.Println(errUnpacking.Error())
 			return false
 		} else {
-			caws := readResponse.Caws
+			caws := readResponse.GetCaws()
 			fmt.Println("Here's your thread information: ")
 			for _, caw := range caws {
 				fmt.Printf("\t Username: %s", caw.Username)
 				fmt.Printf("\t Text: %s", caw.Text)
 				fmt.Printf("\t Id: %d", caw.Id)
 				fmt.Printf("\t Parent_Id: %d", caw.ParentId)
-				// TODO: CHECK AND FIX THIS
-				fmt.Printf("\t Time created: %d", caw.Timestamp)
+				fmt.Printf("\t Time created: %d", caw.Timestamp.Seconds)
 				fmt.Printf("==============================")
 			}
+			return true
 		}
 	} else {
 		return false
@@ -159,12 +165,12 @@ func (cawClient *CawClient) GetProfile(username string) bool {
 	profileRequest := caw.ProfileRequest{
 		Username: username,
 	}
-	anyRequest, errPacking := ptypes.MarshalAny(profileRequest)
+	anyRequest, errPacking := ptypes.MarshalAny(proto.Message(&profileRequest))
 	if errPacking != nil {
 		fmt.Println(errPacking.Error())
 		return false
 	}
-	var anyResponse = new(anypb.Any)
+	var anyResponse = new(any.Any)
 	profileSuccessBool := cawClient.client_.Event(anyRequest, anyResponse,
 											cawClient.functionToEventType_["profile"])
 	if profileSuccessBool {
@@ -177,12 +183,12 @@ func (cawClient *CawClient) GetProfile(username string) bool {
 			fmt.Println("We have retrieved the profile!")
 			fmt.Println("Here's your information: ")
 			fmt.Println("Here are user's followers: ")
-			followers := profileReply.Followers
+			followers := profileResponse.Followers
 			for _, follower := range followers {
 				fmt.Printf("\t %s", follower)
 			}
 			fmt.Println("Here are the user's following: ")
-			following := profileReply.Following
+			following := profileResponse.Following
 			for _, user := range following {
 				fmt.Printf("\t %s", user)
 			}
@@ -206,7 +212,7 @@ func (cawClient *CawClient) HookFunction(functionName string) bool {
 	}
 }
 
-func (cawClient *cawClient) UnhookFunction(functionName string) bool {
+func (cawClient *CawClient) UnhookFunction(functionName string) bool {
 	eventType := cawClient.functionToEventType_[functionName]
 	unhookSuccessBool := cawClient.client_.UnhookFunction(eventType)
 	if unhookSuccessBool {
@@ -220,7 +226,7 @@ func (cawClient *cawClient) UnhookFunction(functionName string) bool {
 }
 
 func (cawClient *CawClient) HookAll() bool {
-	for eventType, functionName := range cawClient.functionToEventType_ {
+	for functionName, eventType := range cawClient.functionToEventType_ {
 		hookSuccessBool := cawClient.client_.HookFunction(eventType, functionName)
 		if !hookSuccessBool {
 			//TODO: MAKE ERROR FORMAT
@@ -233,7 +239,7 @@ func (cawClient *CawClient) HookAll() bool {
 }
 
 func (cawClient *CawClient) UnhookAll() bool {
-	for eventType, _ := range cawClient.functionToEventType_ {
+	for _, eventType := range cawClient.functionToEventType_ {
 		unhookSuccessBool := cawClient.client_.UnhookFunction(eventType)
 		if !unhookSuccessBool {
 			//TODO: MAKE ERROR FORMAT
