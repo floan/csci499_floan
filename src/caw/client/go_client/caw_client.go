@@ -2,6 +2,7 @@ package caw_client
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
@@ -65,7 +66,7 @@ func (cawClient *CawClient) PostCaw(username string,
 	// a brand new caw
 	if parent_id != -1 {
 		cawRequest = caw.CawRequest{ Username: username, Text: text, 
-																 ParentId: []byte(string(parent_id)) }
+																 ParentId: []byte(strconv.Itoa(parent_id)) }
 	} else {
 		cawRequest = caw.CawRequest{ Username: username, Text: text }
 	}
@@ -87,11 +88,11 @@ func (cawClient *CawClient) PostCaw(username string,
 			caw := cawResponse.GetCaw()
 			fmt.Println("Your caw was posted successfully!")
 			fmt.Println("Here's your caw information")
-			fmt.Printf("\t Username: %s", caw.Username)
-			fmt.Printf("\t Text: %s", caw.Text)
-			fmt.Printf("\t Id: %d", caw.Id)
-			fmt.Printf("\t Parent_Id: %d", caw.ParentId)
-			fmt.Printf("\t Time created: %d", caw.Timestamp.Seconds)
+			fmt.Printf("\t Username: %s \n", caw.Username)
+			fmt.Printf("\t Text: %s \n", caw.Text)
+			fmt.Printf("\t Id: %s \n", string(caw.Id))
+			fmt.Printf("\t Parent_Id: %s \n", string(caw.ParentId))
+			fmt.Printf("\t Time created: %d \n", caw.Timestamp.Seconds)
 			return true
 		}
 	} else {
@@ -127,7 +128,7 @@ func (cawClient *CawClient) FollowUser(username string,
 
 func (cawClient *CawClient) ReadCaw(caw_id int) bool {
 	readRequest := caw.ReadRequest{
-		CawId: []byte(string(caw_id)),
+		CawId: []byte(strconv.Itoa(caw_id)),
 	}
 	anyRequest, errPacking := ptypes.MarshalAny(proto.Message(&readRequest))
 	if errPacking != nil {
@@ -147,12 +148,12 @@ func (cawClient *CawClient) ReadCaw(caw_id int) bool {
 			caws := readResponse.GetCaws()
 			fmt.Println("Here's your thread information: ")
 			for _, caw := range caws {
-				fmt.Printf("\t Username: %s", caw.Username)
-				fmt.Printf("\t Text: %s", caw.Text)
-				fmt.Printf("\t Id: %d", caw.Id)
-				fmt.Printf("\t Parent_Id: %d", caw.ParentId)
-				fmt.Printf("\t Time created: %d", caw.Timestamp.Seconds)
-				fmt.Printf("==============================")
+				fmt.Printf("\t Username: %s \n", caw.Username)
+				fmt.Printf("\t Text: %s \n", caw.Text)
+				fmt.Printf("\t Id: %s \n", string(caw.Id))
+				fmt.Printf("\t Parent_Id: %s \n", string(caw.ParentId))
+				fmt.Printf("\t Time created: %d \n", caw.Timestamp.Seconds)
+				fmt.Printf("==============================\n")
 			}
 			return true
 		}

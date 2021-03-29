@@ -3,7 +3,6 @@ package faz_client
 import (
 	"log"
 	"os"
-	"fmt"
 
 	"github.com/golang/protobuf/ptypes/any"
 	"golang.org/x/net/context"
@@ -54,7 +53,6 @@ func (fazClient *FazClient) Event(request *any.Any,
 		EventType: int32(eventType), 
 		Payload: request,
 	}
-	fmt.Println(eventRequest)
 	eventResponse, err := fazClient.stub_.Event(context.Background(), &eventRequest)
 	if err != nil {
 		log.Fatalf("could not perform event: %v", err)
@@ -62,8 +60,7 @@ func (fazClient *FazClient) Event(request *any.Any,
 	} else {
 		// Setting the Any payload in eventResponse to
 		// our Any response variable
-		response = eventResponse.GetPayload()
-		fmt.Println(eventResponse)
+		*response = *eventResponse.GetPayload()
 		return true
 	}
 }

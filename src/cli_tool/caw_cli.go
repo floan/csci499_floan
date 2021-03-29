@@ -61,7 +61,7 @@ func main() {
 	}
 
 	client := caw.CreateCawClient()
-	client.GetProfile(*userPtr)
-	client.RegisterUser("Firas")
+	// client.PostCaw(*userPtr, *cawPtr, *replyPtr)
+	client.ReadCaw(*readPtr)
 
 }
