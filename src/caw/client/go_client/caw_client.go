@@ -35,6 +35,13 @@ func CreateCawClient() *CawClient {
 	return cawClient
 }
 
+// This function acts as a destructor for 
+// the caw client. All it does is call the 
+// Faz client destructor to close the connection
+func (cawClient *CawClient) DestroyCawClient() {
+	cawClient.client_.DestroyFazClient()
+}
+
 // Registers the user in the kvstore database
 // Args: the users username string
 // Returns: bool to indicate success / failure

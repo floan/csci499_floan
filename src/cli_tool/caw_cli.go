@@ -90,4 +90,7 @@ func main() {
 	} else if *unhookallPtr {
 		client.UnhookAll()
 	}
+	
+	// Calling destructor to close Faz connection
+	client.DestroyCawClient()
 }
