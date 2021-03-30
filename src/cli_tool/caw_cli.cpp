@@ -3,7 +3,7 @@
 
 #include <gflags/gflags.h>
 
-#include "../caw/client/caw_client.h"
+#include "../caw/client/cpp_client/caw_client.h"
 
 DEFINE_string(registeruser, "", "Registers the given username");
 DEFINE_string(user, "", "Logs in as the given username");

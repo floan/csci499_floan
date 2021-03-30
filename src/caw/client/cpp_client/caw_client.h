@@ -12,7 +12,7 @@
 #include <google/protobuf/any.pb.h>
 #include <grpcpp/grpcpp.h>
 
-#include "../../faz/client/faz_client.h"
+#include "../../../faz/client/cpp_client/faz_client.h"
 
 using google::protobuf::Any;
 using grpc::Channel;
