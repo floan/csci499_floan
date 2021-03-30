@@ -60,8 +60,34 @@ func main() {
 		os.Exit(1)
 	}
 
-	client := caw.CreateCawClient()
-	// client.PostCaw(*userPtr, *cawPtr, *replyPtr)
-	client.ReadCaw(*readPtr)
+	// Error checking done, now
+	// we can handle arguments
 
+	// Creating client instance
+	client := caw.CreateCawClient()
+
+	if *registeruserPtr != "" {
+		client.RegisterUser(*registeruserPtr)
+	} else if *replyPtr != -1 {
+		client.PostCaw(*userPtr, *cawPtr, *replyPtr)
+	} else if *cawPtr != "" {
+		// Since we have already checked for reply
+		// We know this would be a caw and not a reply
+		// According to specs, we specify a new caw using -1
+		client.PostCaw(*userPtr, *cawPtr, -1)
+	} else if *followPtr != "" {
+		client.FollowUser(*userPtr, *followPtr)
+	} else if *readPtr != -1 {
+		client.ReadCaw(*readPtr)
+	} else if *profilePtr {
+		client.GetProfile(*userPtr)
+	} else if *hookPtr != "" {
+		client.HookFunction(*hookPtr)
+	} else if *unhookPtr != "" {
+		client.UnhookFunction(*unhookPtr)
+	} else if *hookallPtr {
+		client.HookAll()
+	} else if *unhookallPtr {
+		client.UnhookAll()
+	}
 }

@@ -35,6 +35,9 @@ func CreateCawClient() *CawClient {
 	return cawClient
 }
 
+// Registers the user in the kvstore database
+// Args: the users username string
+// Returns: bool to indicate success / failure
 func (cawClient *CawClient) RegisterUser(username string) bool {
 	registerRequest := caw.RegisteruserRequest{
 		Username: username,
@@ -58,6 +61,11 @@ func (cawClient *CawClient) RegisterUser(username string) bool {
 	}
 } 
 
+// Creates and saves a caw "post" in the kvstore
+// This also performs the reply functionality
+// when given a parent id
+// Args: posters username and text to post
+// Returns: bool to indicate success / failure
 func (cawClient *CawClient) PostCaw(username string,
 																		text string,
 																		parent_id int) bool {
@@ -96,10 +104,16 @@ func (cawClient *CawClient) PostCaw(username string,
 			return true
 		}
 	} else {
+		errPosting := fmt.Errorf("There was an error in posting your caw")
+		fmt.Println(errPosting.Error())
 		return false
 	}
 }
 
+// Follows a user
+// Args: username of person following and username of person
+//       to follow
+// Returns: bool to indicate success / failure
 func (cawClient *CawClient) FollowUser(username string, 
 																			 to_follow string) bool {
 	followRequest := caw.FollowRequest{
@@ -124,8 +138,11 @@ func (cawClient *CawClient) FollowUser(username string,
 	}
 }
 
-	//TODO: ADD ERROR MESSAGES IN THE ELSE SPACE 
 
+// Gets an entire caw thread from the database
+// and prints it out in a readable format
+// Args: Id of the caw whose sub thread user wants
+// Returns: a string of the caw threads
 func (cawClient *CawClient) ReadCaw(caw_id int) bool {
 	readRequest := caw.ReadRequest{
 		CawId: []byte(strconv.Itoa(caw_id)),
@@ -158,10 +175,16 @@ func (cawClient *CawClient) ReadCaw(caw_id int) bool {
 			return true
 		}
 	} else {
+		errReading := fmt.Errorf("There was an error in reading the caw.")
+		fmt.Println(errReading.Error())
 		return false
 	}
 }
 
+// Gets a users following and follower lists
+// and prints them out in readable formats
+// Args: username of user whose lists we want
+// Returns: a vector of two vectors, followers and following
 func (cawClient *CawClient) GetProfile(username string) bool {
 	profileRequest := caw.ProfileRequest{
 		Username: username,
@@ -186,16 +209,18 @@ func (cawClient *CawClient) GetProfile(username string) bool {
 			fmt.Println("Here are user's followers: ")
 			followers := profileResponse.Followers
 			for _, follower := range followers {
-				fmt.Printf("\t %s", follower)
+				fmt.Printf("\t %s \n", follower)
 			}
 			fmt.Println("Here are the user's following: ")
 			following := profileResponse.Following
 			for _, user := range following {
-				fmt.Printf("\t %s", user)
+				fmt.Printf("\t %s \n", user)
 			}
 			return true;
 		}
 	} else {
+		errProfile := fmt.Errorf("There was an error in getting user profile")
+		fmt.Println(errProfile.Error())
 		return false
 	}
 }
@@ -207,8 +232,8 @@ func (cawClient *CawClient) HookFunction(functionName string) bool {
 		fmt.Println("Your function was successfully hooked.")
 		return true
 	} else {
-		//TODO: MAKE THIS IN ERROR FORMAT
-		fmt.Println("Something went wrong when hooking your function.")
+		errHooking := fmt.Errorf("Something went wrong when hooking your function.")
+		fmt.Println(errHooking.Error())
 		return false
 	}
 }
@@ -220,8 +245,8 @@ func (cawClient *CawClient) UnhookFunction(functionName string) bool {
 		fmt.Println("Your function was successfully unhooked.")
 		return true
 	} else {
-		//TODO: MAKE THIS IN ERROR FORMAT
-		fmt.Println("Something went wrong when unhooking your function.")
+		errUnhooking := fmt.Errorf("Something went wrong when unhooking your function.")
+		fmt.Println(errUnhooking.Error())
 		return false
 	}
 }
@@ -230,8 +255,8 @@ func (cawClient *CawClient) HookAll() bool {
 	for functionName, eventType := range cawClient.functionToEventType_ {
 		hookSuccessBool := cawClient.client_.HookFunction(eventType, functionName)
 		if !hookSuccessBool {
-			//TODO: MAKE ERROR FORMAT
-			fmt.Println("There was a problem hooking all functions.")
+			errHooking := fmt.Errorf("There was a problem hooking all functions.")
+			fmt.Println(errHooking.Error())
 			return false
 		} //Else do nothing, keep hooking
 	}
@@ -243,8 +268,8 @@ func (cawClient *CawClient) UnhookAll() bool {
 	for _, eventType := range cawClient.functionToEventType_ {
 		unhookSuccessBool := cawClient.client_.UnhookFunction(eventType)
 		if !unhookSuccessBool {
-			//TODO: MAKE ERROR FORMAT
-			fmt.Println("There was a problem unhooking all functions.")
+			errUnhooking := fmt.Errorf("There was a problem unhooking all functions.")
+			fmt.Println(errUnhooking.Error())
 			return false
 		} //Else do nothing, keep hooking
 	}
