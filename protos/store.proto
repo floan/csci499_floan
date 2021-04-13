@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "google/protobuf/any.proto";
+
 package kvstore;
 
 message PutRequest {
@@ -27,8 +29,27 @@ message RemoveReply {
   // Empty because success/failure is signaled via GRPC status.
 }
 
+message SubscribeRequest {
+  bytes key = 1;
+}
+
+message SubscribeReply {
+  // Empty because success/failure is signaled via GRPC status.
+}
+
+message PublishRequest {
+  bytes key = 1;
+  bytes messsage = 2;
+}
+
+message PublishReply {
+  // Empty because success/failure is signaled via GRPC status.
+}
+
 service KeyValueStore {
   rpc put (PutRequest) returns (PutReply) {}
   rpc get (stream GetRequest) returns (stream GetReply) {}
   rpc remove (RemoveRequest) returns (RemoveReply) {}
+  rpc subscribe (SubscribeRequest) returns (stream SubscribeReply) {}
+  rpc publish (PublishRequest) returns (PublishReply) {}
 }
