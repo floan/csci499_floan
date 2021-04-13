@@ -17,3 +17,6 @@ cmake_install.cmake
 cpplint.py
 build/
 protos/go_protos/
+
+# vim systastic
+.syntastic_cpp_config_file
