@@ -13,6 +13,7 @@
 using grpc::Channel;
 using grpc::ClientContext;
 using grpc::ClientReaderWriter;
+using grpc::ServerWriter;
 using grpc::Status;
 
 using kvstore::GetReply;
@@ -21,6 +22,7 @@ using kvstore::PutReply;
 using kvstore::PutRequest;
 using kvstore::RemoveReply;
 using kvstore::RemoveRequest;
+using kvstore::SubscribeReply;
 
 // This class wraps our core Key value store implementation
 // with grpc. It processes a request in cpp syntax input to
@@ -43,7 +45,11 @@ class KeyValueStoreClient final : public KeyValueStoreInterface {
   // Args: Key to remove from kvstore
   // Returns: boolean indicating success/failure
   bool Remove(const std::string &key);
-
+  // subscribes to a key and passes in server writer for the key
+  // to output messages that are published to the key
+  bool Subscribe(const std::string &key, ServerWriter<SubscribeReply>* stream);
+  // publishes a message to all subscribers to a given key
+  bool Publish(const std::string &key, const std::string &message);
  private:
   // A connection to our grpc server
   std::unique_ptr<kvstore::KeyValueStore::Stub> stub_;

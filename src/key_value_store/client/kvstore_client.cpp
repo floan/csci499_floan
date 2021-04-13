@@ -65,3 +65,13 @@ bool KeyValueStoreClient::Remove(const std::string &key) {
     return false;
   }
 }
+
+bool KeyValueStoreClient::Subscribe(const std::string &key,
+                                    ServerWriter<SubscribeReply> *stream) {
+  return true;
+}
+
+bool KeyValueStoreClient::Publish(const std::string &key,
+                                  const std::string &message) {
+  return true;
+}
