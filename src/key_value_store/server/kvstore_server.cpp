@@ -55,6 +55,17 @@ Status KeyValueStoreImpl::remove(ServerContext *context,
   return status;
 }
 
+
+Status KeyValueStoreImpl::subscribe(ServerContext* context, const SubscribeRequest* request,
+                      ServerWriter<SubscribeReply>* reply) {
+  return Status::OK;
+}
+
+Status KeyValueStoreImpl::publish(ServerContext* context, const PublishRequest* request,
+                      PublishReply* reply) {
+  return Status::OK;
+}
+
 Status KeyValueStoreImpl::storeDataToFile() {
   LOG(INFO) << "Storing Data To File";
   std::ofstream ofile(filename_);
@@ -87,7 +98,7 @@ Status KeyValueStoreImpl::storeDataToFile() {
       snapshot.add_pairs()->CopyFrom(pair);
     }
     // All the kvstorePairs are now stored in the
-    // kvstoreSnapshot. We will aquire a lock 
+    // kvstoreSnapshot. We will aquire a lock
     // and store to file.
     const std::lock_guard<std::mutex> lock(lock_);
     bool serializeSuccessBool = snapshot.SerializeToOstream(&ofile);
