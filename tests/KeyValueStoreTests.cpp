@@ -57,6 +57,23 @@ TEST(KeyValueStoreTest, remove_entire_mapping) {
   EXPECT_EQ(false, test_store.Remove("func1"));
 }
 
+// simple one subscriber
+TEST(KeyValueStoreTest, get_stream_one) {
+}
+
+// two subscribers to one key
+TEST(KeyValueStoreTest, get_stream_two) {
+}
+
+// test to make sure when a callback returns false that it is removed
+// from the sub map
+TEST(KeyValueStoreTest, get_stream_fail) {
+}
+
+// simple test of two separate key streams
+TEST(KeyValueStoreTest, get_stream_two_subs) {
+}
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
