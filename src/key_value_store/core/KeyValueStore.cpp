@@ -20,7 +20,7 @@ bool KeyValueStore::Put(const std::string &key, const std::string &value) {
   // extract tags from value using regex expression and push to tags vector
   std::string str = value;
   std::smatch match;
-  std::regex expr("#[A-Za-z0-9]*");
+  std::regex expr("#[A-Za-z0-9]+");
   std::vector<std::string> tags;
   while (std::regex_search(str, match, expr)) {
     for (auto m : match) {

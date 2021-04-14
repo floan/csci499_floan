@@ -26,17 +26,29 @@ Status KeyValueStoreImpl::put(ServerContext *context, const PutRequest *request,
   }
 }
 
-Status
-KeyValueStoreImpl::get(ServerContext *context,
-                       ServerReaderWriter<GetReply, GetRequest> *stream) {
+Status KeyValueStoreImpl::get(
+    ServerContext *context, ServerReaderWriter<GetReply, GetRequest> *stream) {
   GetRequest request;
   while (stream->Read(&request)) {
-    // Get the value vector and store it in values
-    std::vector<std::string> values(store_.Get(request.key()));
-    for (const std::string &s : values) {
-      GetReply response;
-      response.set_value(s);
-      stream->Write(response);
+    // check if requestiong previous or stream of data
+    if (context->client_metadata().find("request-type")->second == "previous") {
+      // Get the value vector and store it in values
+      std::vector<std::string> values(store_.Get(request.key()));
+      for (const std::string &s : values) {
+        GetReply response;
+        response.set_value(s);
+        stream->Write(response);
+      }
+    } else {  // request-type == stream
+      std::function<bool(std::string)> sub_function = [stream](std::string m) {
+        GetReply response;
+        response.set_value(m);
+        return stream->Write(response);  // returns if stream write successful
+      };
+      store_.Get(request.key(), sub_function);
+      while (true) {
+        // infinite loop to keep client connection alive and reading
+      }
     }
   }
   return Status::OK;
@@ -87,7 +99,7 @@ Status KeyValueStoreImpl::storeDataToFile() {
       snapshot.add_pairs()->CopyFrom(pair);
     }
     // All the kvstorePairs are now stored in the
-    // kvstoreSnapshot. We will aquire a lock 
+    // kvstoreSnapshot. We will aquire a lock
     // and store to file.
     const std::lock_guard<std::mutex> lock(lock_);
     bool serializeSuccessBool = snapshot.SerializeToOstream(&ofile);
