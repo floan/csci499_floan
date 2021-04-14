@@ -1,14 +1,14 @@
 #ifndef KEY_VALUE_STORE_CLIENT_
 #define KEY_VALUE_STORE_CLIENT_
 
-#include "../KeyValueStoreInterface.h"
-#include "store.grpc.pb.h"
+#include <glog/logging.h>
+#include <grpcpp/grpcpp.h>
 
 #include <string>
 #include <vector>
 
-#include <glog/logging.h>
-#include <grpcpp/grpcpp.h>
+#include "../KeyValueStoreInterface.h"
+#include "store.grpc.pb.h"
 
 using grpc::Channel;
 using grpc::ClientContext;
@@ -39,6 +39,9 @@ class KeyValueStoreClient final : public KeyValueStoreInterface {
   // Args: Key to search the kvstore
   // Returns: Value list, empty if key is nonexistent
   std::vector<std::string> Get(const std::string &key);
+  // Get stream for a tag and calls callback function when
+  // the request tag is put into KV
+  bool Get(const std::string &tag, std::function<bool(std::string)> &callback);
   // Performs normal remove functionality
   // Args: Key to remove from kvstore
   // Returns: boolean indicating success/failure
