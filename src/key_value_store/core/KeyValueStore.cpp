@@ -24,7 +24,7 @@ bool KeyValueStore::Put(const std::string &key, const std::string &value) {
   std::vector<std::string> tags;
   while (std::regex_search(str, match, expr)) {
     for (auto m : match) {
-      tags.push_back(m);
+      tags.push_back(m.str().substr(1));
     }
     str = match.suffix().str();
   }
@@ -33,13 +33,14 @@ bool KeyValueStore::Put(const std::string &key, const std::string &value) {
     auto sub_it = sub_map_.find(tag);
     // if sub_map_ contains callback functions for a given tag
     if (sub_it != sub_map_.end()) {
-      auto callback_vec = sub_it->second;  // vector of all callbacks for tag
-      auto callback_it = callback_vec.begin();
-      while (callback_it !=
-             callback_vec.end()) {  // execute callbacks with value as parameter
-        bool success = (*callback_it)(value);
+      auto &callback_vec = sub_it->second;  // vector of all callbacks for tag
+      // execute callbacks with value as parameter
+      for (auto it = callback_vec.begin(); it != callback_vec.end();) {
+        bool success = (*it)(value);
         if (!success) {  // remove callback from map if fails
-          callback_it = callback_vec.erase(callback_it);
+          it = callback_vec.erase(it);
+        } else {
+          ++it;
         }
       }
     }
