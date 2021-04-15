@@ -18,15 +18,15 @@ bool KeyValueStore::Put(const std::string &key, const std::string &value) {
     result = kv_store_.insert({key, {value}}).second;
   }
   // extract tags from value using regex expression and push to tags vector
-  std::string str = value;
+  std::string str_to_parse = value;
   std::smatch match;
   std::regex expr("#[A-Za-z0-9]*");
   std::vector<std::string> tags;
-  while (std::regex_search(str, match, expr)) {
+  while (std::regex_search(str_to_parse, match, expr)) {
     for (auto m : match) {
       tags.push_back(m);
     }
-    str = match.suffix().str();
+    str_to_parse = match.suffix().str();
   }
   // execute all callbacks for all tags with value as the parameter
   for (auto tag : tags) {
