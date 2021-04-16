@@ -1,9 +1,8 @@
-#include "../src/key_value_store/core/KeyValueStore.h"
-
 #include <mutex>
 #include <string>
 #include <vector>
 
+#include "../src/key_value_store/core/KeyValueStore.h"
 #include "gtest/gtest.h"
 
 // This is a basic test to ensure the
@@ -55,6 +54,67 @@ TEST(KeyValueStoreTest, remove_entire_mapping) {
   test_store.Put("func1", "sayNotCool");
   EXPECT_EQ(true, test_store.Remove("func1"));
   EXPECT_EQ(false, test_store.Remove("func1"));
+}
+
+// simple one subscriber
+TEST(KeyValueStoreTest, get_stream_one) {
+  const std::string kMessage = "message #tag1 and rest of message";
+  KeyValueStore test_store;
+  std::function<bool(std::string)> f1 = [&kMessage](std::string m) {
+    EXPECT_EQ(kMessage, m);
+    return true;
+  };
+  test_store.Get("tag1", f1);
+  test_store.Put("key1", kMessage);
+}
+
+// two subscribers to one key
+TEST(KeyValueStoreTest, get_stream_two) {
+  const std::string kMessage = "message #tag1 and rest of message";
+  int count = 0;
+  KeyValueStore test_store;
+  std::function<bool(std::string)> f1 = [&kMessage, &count](std::string m) {
+    EXPECT_EQ(kMessage, m);
+    count++;
+    return true;
+  };
+  test_store.Get("tag1", f1);
+  test_store.Get("tag1", f1);
+  test_store.Put("key1", kMessage);
+  EXPECT_EQ(2, count);
+}
+
+// test to make sure when a callback returns false that it is removed
+// from the sub map
+TEST(KeyValueStoreTest, get_stream_fail) {
+  const std::string kMessage = "message #tag1 and rest of message";
+  int count = 0;
+  KeyValueStore test_store;
+  std::function<bool(std::string)> f1 = [&kMessage, &count](std::string m) {
+    EXPECT_EQ(kMessage, m);
+    count++;
+    return false;
+  };
+  test_store.Get("tag1", f1);
+  test_store.Put("key1", kMessage);
+  test_store.Put("key2", kMessage);
+  EXPECT_EQ(1, count);
+}
+
+// simple test of two separate key streams
+TEST(KeyValueStoreTest, get_stream_two_subs) {
+  const std::string kMessage = "message #tag1 and #tag2 and rest of message";
+  int count = 0;
+  KeyValueStore test_store;
+  std::function<bool(std::string)> f1 = [&kMessage, &count](std::string m) {
+    EXPECT_EQ(kMessage, m);
+    count++;
+    return true;
+  };
+  test_store.Get("tag1", f1);
+  test_store.Get("tag2", f1);
+  test_store.Put("key1", kMessage);
+  EXPECT_EQ(2, count);
 }
 
 int main(int argc, char **argv) {
