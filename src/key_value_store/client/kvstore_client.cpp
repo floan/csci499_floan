@@ -25,6 +25,7 @@ bool KeyValueStoreClient::Put(const std::string &key,
 std::vector<std::string> KeyValueStoreClient::Get(const std::string &key) {
   GetRequest request;
   ClientContext context;
+  context.AddMetadata("request-type", "previous");
   request.set_key(key);
 
   // Initializing the ClientReaderWriter
@@ -48,6 +49,30 @@ std::vector<std::string> KeyValueStoreClient::Get(const std::string &key) {
   }
   // Either way we return values, empty vector or not
   return values;
+}
+
+bool KeyValueStoreClient::Get(const std::string &tag,
+                              std::function<bool(std::string)> &callback) {
+  GetRequest request;
+  ClientContext context;
+  context.AddMetadata("request-type", "stream");
+  request.set_key(tag);  // pass tag as key
+
+  // Initializing the ClientReaderWriter
+  std::shared_ptr<ClientReaderWriter<GetRequest, GetReply>> stream(
+      stub_->get(&context));
+
+  // Writing the request to the ReaderWrtier
+  stream->Write(request);
+  stream->WritesDone();
+
+  GetReply response;
+  while (stream->Read(&response)) {
+    callback(response.value());  // might need to capture return value later
+  }
+  Status status = stream->Finish();
+  LOG(INFO) << status.error_code() << ": " << status.error_message();
+  return status.ok();
 }
 
 bool KeyValueStoreClient::Remove(const std::string &key) {
