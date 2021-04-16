@@ -40,11 +40,13 @@ Status KeyValueStoreImpl::get(
         stream->Write(response);
       }
     } else {  // request-type == stream
-      std::function<bool(std::string)> sub_function = [stream](std::string m) {
-        GetReply response;
-        response.set_value(m);
-        return stream->Write(response);  // returns if stream write successful
-      };
+      std::function<bool(std::string)> sub_function =
+          [stream](std::string caw_message) {
+            GetReply response;
+            response.set_value(caw_message);
+            return stream->Write(
+                response);  // returns if stream write successful
+          };
       store_.Get(request.key(), sub_function);
       while (true) {
         // infinite loop to keep client connection alive and reading
