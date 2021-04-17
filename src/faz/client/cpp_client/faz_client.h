@@ -1,21 +1,22 @@
 #ifndef FAZ_CLIENT_
 #define FAZ_CLIENT_
 
-#include "faz.grpc.pb.h"
+#include <glog/logging.h>
+#include <google/protobuf/any.pb.h>
+#include <grpcpp/grpcpp.h>
 
 #include <iostream>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-#include <glog/logging.h>
-#include <google/protobuf/any.pb.h>
-#include <grpcpp/grpcpp.h>
+#include "faz.grpc.pb.h"
 
 using google::protobuf::Any;
 using grpc::Channel;
 using grpc::ClientContext;
 using grpc::ClientReaderWriter;
+using grpc::ServerWriter;
 using grpc::Status;
 
 using faz::EventReply;
@@ -42,6 +43,10 @@ class FazClient final {
   //       represent the input and output from our registered function
   // Returns: A grpc Status indicating success / failure
   Status Event(Any request, Any *response, int eventType);
+  // calls event function for events that need to be watched to see if there
+  // will be an update (similar to a pub sub functionality)
+  Status StreamEvent(const Any request, ServerWriter<EventReply> *reply,
+                     int eventType);
   // This method calls the Faz hook function. This is supposed to
   // hook a custom function to our FaaS.
   // Args: An event type that corresponds with the function call

@@ -16,6 +16,7 @@ using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::ServerReaderWriter;
+using grpc::ServerWriter;
 using grpc::Status;
 using grpc::StatusCode;
 
@@ -73,6 +74,10 @@ class FazServiceImpl final : public faz::FazService::Service {
   // Returns: GRPC Status indicating success/error
   Status event(ServerContext *context, const EventRequest *request,
                EventReply *response) override;
+
+  // stream events from server-side to client
+  Status streamEvent(ServerContext* context, const EventRequest* request,
+                      ServerWriter<EventReply>* reply) override;
 
  private:
   // This is a string -> function mapping of

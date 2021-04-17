@@ -26,6 +26,11 @@ Status FazClient::Event(Any request, Any *response, int eventType) {
   return status;
 }
 
+Status FazClient::StreamEvent(const Any request,
+                              ServerWriter<EventReply> *reply, int eventType) {
+  return Status::OK;
+}
+
 Status FazClient::HookFunction(int eventType, std::string functionName) {
   HookRequest request;
   HookReply response;
