@@ -43,4 +43,5 @@ service FazService {
   rpc hook (HookRequest) returns (HookReply) {}
   rpc unhook (UnhookRequest) returns (UnhookReply) {}
   rpc event (EventRequest) returns (EventReply) {}
+  rpc streamEvent (EventRequest) returns (stream EventReply) {}
 }
