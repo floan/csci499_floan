@@ -1,16 +1,15 @@
 #ifndef CAW_FUNCTIONS_
 #define CAW_FUNCTIONS_
 
-#include "caw.pb.h"
-
-#include <string>
-#include <vector>
-
 #include <glog/logging.h>
 #include <google/protobuf/any.pb.h>
 #include <grpcpp/grpcpp.h>
 
+#include <string>
+#include <vector>
+
 #include "../../key_value_store/KeyValueStoreInterface.h"
+#include "caw.pb.h"
 
 using google::protobuf::Any;
 using grpc::Channel;
@@ -24,6 +23,8 @@ using caw::CawReply;
 using caw::CawRequest;
 using caw::FollowReply;
 using caw::FollowRequest;
+using caw::HashtagReply;
+using caw::HashtagRequest;
 using caw::ProfileReply;
 using caw::ProfileRequest;
 using caw::ReadReply;
@@ -76,4 +77,13 @@ Status FollowUser(const Any &EventRequest, Any &EventReply,
 // Returns: Status indicating success / error message
 Status GetProfile(const Any &EventRequest, Any &EventReply,
                   KeyValueStoreInterface &kvstore);
+// streams Caws that contain the provided hashtag
+// Args: EventRequest: that contains a TagRequesst which contains the hashtag
+//       EventReply: that contains a ProfileReply
+//       std::function: callback function to execute when new Caw contains the
+//       provided hashtag
+// Returns: Status indicating success / error message
+Status StreamTag(const Any &EventRequest, Any &EventReply,
+                 KeyValueStoreInterface &kvstore,
+                 std::function<bool(std::string)> &);
 #endif

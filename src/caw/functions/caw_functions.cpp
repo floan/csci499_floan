@@ -7,10 +7,9 @@
 #include <chrono>
 #include <ctime>
 #include <sstream>
-#include <string>
-#include <sys/time.h>
-#include <vector>
 #include <stack>
+#include <string>
+#include <vector>
 
 Status RegisterUser(const Any &EventRequest, Any &EventReply,
                     KeyValueStoreInterface &kvstore) {
@@ -112,23 +111,23 @@ Status ReadCaw(const Any &EventRequest, Any &EventReply,
     status = Status(StatusCode::NOT_FOUND, "The provided caw does not exist.");
   } else {
     std::stack<std::string> dfsStack;
-    std::string currentCawString; 
+    std::string currentCawString;
     Caw *addCawsToResponse;
     std::vector<std::string> childrenCaws;
 
     dfsStack.push(caw_id);
     while (!dfsStack.empty()) {
-      caw_id = dfsStack.top(); 
+      caw_id = dfsStack.top();
       dfsStack.pop();
       currentCawString = kvstore.Get("caw_" + caw_id)[0];
       addCawsToResponse = response.add_caws();
       addCawsToResponse->ParseFromString(currentCawString);
       std::vector<std::string> childrenCaws =
-        kvstore.Get("caw_" + caw_id + "_children");
+          kvstore.Get("caw_" + caw_id + "_children");
       for (int i = childrenCaws.size() - 1; i >= 0; i--) {
         // Pushing into stack backwards because we
         // want replys to be printed chronologically
-        // i.e. first reply and all its replies printed 
+        // i.e. first reply and all its replies printed
         // first, then second reply and all its replies etc.
         dfsStack.push(childrenCaws[i]);
       }
@@ -148,8 +147,8 @@ Status FollowUser(const Any &EventRequest, Any &EventReply,
   Status status;
   EventRequest.UnpackTo(&request);
   std::vector<std::string> userList = kvstore.Get("caw_users");
-  std::vector<std::string> following = 
-    kvstore.Get("caw_user_" + request.username() + "_following");
+  std::vector<std::string> following =
+      kvstore.Get("caw_user_" + request.username() + "_following");
   if (std::find(userList.begin(), userList.end(), request.username()) ==
           userList.end() ||
       std::find(userList.begin(), userList.end(), request.to_follow()) ==
@@ -158,8 +157,8 @@ Status FollowUser(const Any &EventRequest, Any &EventReply,
         Status(StatusCode::NOT_FOUND, "You have not provided valid usernames");
   } else if (request.username() == request.to_follow()) {
     status = Status(StatusCode::INVALID_ARGUMENT, "You cannot follow yourself");
-  } else if (std::find(following.begin(), following.end(), 
-             request.to_follow()) != following.end()) {
+  } else if (std::find(following.begin(), following.end(),
+                       request.to_follow()) != following.end()) {
     status = Status(StatusCode::INVALID_ARGUMENT,
                     "You are already following the user");
   } else {
@@ -199,5 +198,24 @@ Status GetProfile(const Any &EventRequest, Any &EventReply,
     status = Status::OK;
   }
   EventReply.PackFrom(response);
+  return status;
+}
+
+Status StreamTag(const Any &EventRequest, Any &EventReply,
+                 KeyValueStoreInterface &kvstore,
+                 std::function<bool(std::string)> &callback) {
+  LOG(INFO) << "Processing StreamTag request.";
+  HashtagRequest request;
+  HashtagReply response;
+  Status status;
+  EventRequest.UnpackTo(&request);
+  bool ok = kvstore.Get(request.hashtag(),
+                        callback);  // loops till callback returns false
+  if (ok) {
+    status = Status::OK;
+  } else {
+    status = Status(StatusCode::INTERNAL,
+                    "There was an internal error processing your request");
+  }
   return status;
 }

@@ -54,3 +54,8 @@ Status FazServiceImpl::event(ServerContext *context,
   }
   return status;
 }
+
+Status streamEvent(ServerContext *context, const EventRequest *request,
+                   ServerWriter<EventReply> *reply) {
+  return Status::OK;
+}

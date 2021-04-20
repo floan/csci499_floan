@@ -61,3 +61,12 @@ message ProfileReply {
   repeated string followers = 1;
   repeated string following = 2;
 }
+
+message HashtagRequest {
+  string hashtag = 1; // the hashtag string (not including the # sign)
+}
+
+message HashtagReply {
+  Caw caw = 1; // the caw that was just posted with the hashtag
+}
+

@@ -1,13 +1,12 @@
-#include "../src/caw/functions/caw_functions.h"
-#include "../src/key_value_store/core/KeyValueStore.h"
-
 #include <string>
 #include <vector>
 
+#include "../src/caw/functions/caw_functions.h"
+#include "../src/key_value_store/core/KeyValueStore.h"
 #include "gtest/gtest.h"
 
 KeyValueStore store;
-KeyValueStoreInterface &kvstore = store;
+KeyValueStoreInterface& kvstore = store;
 
 // Test to see if the caw function registers
 // a user properly
@@ -255,7 +254,28 @@ TEST(GetProfileTest, lessBasic_getprofile_test) {
   EXPECT_EQ(response.followers()[0], "Loan");
 }
 
-int main(int argc, char **argv) {
+//  tests streaming hashtag functionality
+TEST(StreamTagTest, hashtag_stream) {
+  const std::string kMessage = "message #tag1 and #tag2 and rest of message";
+  int count = 0;
+  Any EventRequest;
+  Any* EventReply = new Any();
+  HashtagRequest request;
+  HashtagRequest response;
+  request.set_hashtag("tag1");
+  EventRequest.PackFrom(request);
+  std::function<bool(std::string)> f1 = [&kMessage, &count](std::string m) {
+    EXPECT_EQ(kMessage, m);
+    count++;
+    return true;
+  };
+  Status status = StreamTag(EventRequest, *EventReply, kvstore, f1);
+  kvstore.Put("key1", kMessage);
+  EXPECT_EQ(1, count);
+  EXPECT_EQ(status.error_code(), 0);
+}
+
+int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

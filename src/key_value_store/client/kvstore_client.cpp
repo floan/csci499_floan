@@ -67,8 +67,9 @@ bool KeyValueStoreClient::Get(const std::string &tag,
   stream->WritesDone();
 
   GetReply response;
-  while (stream->Read(&response)) {
-    callback(response.value());  // might need to capture return value later
+  bool callback_response = true;  // false when need to exit function
+  while (stream->Read(&response) && callback_response) {
+    callback_response = callback(response.value());
   }
   Status status = stream->Finish();
   LOG(INFO) << status.error_code() << ": " << status.error_message();
