@@ -201,16 +201,29 @@ Status GetProfile(const Any &EventRequest, Any &EventReply,
   return status;
 }
 
-Status StreamTag(const Any &EventRequest, Any &EventReply,
-                 KeyValueStoreInterface &kvstore,
-                 std::function<bool(std::string)> &callback) {
+Status StreamTag(const Any &EventRequest, KeyValueStoreInterface &kvstore,
+                 std::function<bool(Any &)> &callback) {
   LOG(INFO) << "Processing StreamTag request.";
   HashtagRequest request;
-  HashtagReply response;
   Status status;
   EventRequest.UnpackTo(&request);
+  // This callback packs up a serialized caw that is returned through kv
+  // into a caw object, next into a HashtagReply, next into an Any object,
+  // and finally into a an EventReply for the StreamTag callback to
+  // handle. the callback provided by StreamTag will handle this Any and
+  // return a boolean if it was successful
+  std::function<bool(std::string)> tag_callback =
+      [&callback](std::string serialized_caw) {
+        Caw response_caw;
+        response_caw.ParseFromString(serialized_caw);
+        HashtagReply hashtag_reply;
+        hashtag_reply.mutable_caw()->CopyFrom(response_caw);
+        Any response;
+        response.PackFrom(hashtag_reply);
+        return callback(response);
+      };
   bool ok = kvstore.Get(request.hashtag(),
-                        callback);  // loops till callback returns false
+                        tag_callback);  // loops till callback returns false
   if (ok) {
     status = Status::OK;
   } else {
