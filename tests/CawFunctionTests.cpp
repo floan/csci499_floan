@@ -257,20 +257,24 @@ TEST(GetProfileTest, lessBasic_getprofile_test) {
 //  tests streaming hashtag functionality
 TEST(StreamTagTest, hashtag_stream) {
   const std::string kMessage = "message #tag1 and #tag2 and rest of message";
+  Caw test_caw;
+  test_caw.set_text(kMessage);
+  std::string test_caw_serialized;
+  test_caw.SerializeToString(&test_caw_serialized);
   int count = 0;
   Any EventRequest;
-  Any* EventReply = new Any();
   HashtagRequest request;
-  HashtagRequest response;
   request.set_hashtag("tag1");
   EventRequest.PackFrom(request);
-  std::function<bool(std::string)> f1 = [&kMessage, &count](std::string m) {
-    EXPECT_EQ(kMessage, m);
+  std::function<bool(Any&)> f1 = [&kMessage, &count](Any& reply_any) {
+    HashtagReply hashtag_reply;
+    reply_any.UnpackTo(&hashtag_reply);
+    EXPECT_EQ(kMessage, hashtag_reply.caw().text());
     count++;
     return true;
   };
-  Status status = StreamTag(EventRequest, *EventReply, kvstore, f1);
-  kvstore.Put("key1", kMessage);
+  Status status = StreamTag(EventRequest, kvstore, f1);
+  kvstore.Put("sample caw", test_caw_serialized);
   EXPECT_EQ(1, count);
   EXPECT_EQ(status.error_code(), 0);
 }
