@@ -15,6 +15,7 @@
 using google::protobuf::Any;
 using grpc::Channel;
 using grpc::ClientContext;
+using grpc::ClientReader;
 using grpc::ClientReaderWriter;
 using grpc::ServerWriter;
 using grpc::Status;
@@ -44,9 +45,10 @@ class FazClient final {
   // Returns: A grpc Status indicating success / failure
   Status Event(Any request, Any *response, int eventType);
   // calls event function for events that need to be watched to see if there
-  // will be an update (similar to a pub sub functionality)
-  Status StreamEvent(const Any request, ServerWriter<EventReply> *reply,
-                     int eventType);
+  // will be an update (similar to a pub sub functionality).  The callback will
+  // be passed an EventReply object to be read by the user of the faz client.
+  Status StreamEvent(const Any request,
+                     std::function<void(EventReply)> &callback, int eventType);
   // This method calls the Faz hook function. This is supposed to
   // hook a custom function to our FaaS.
   // Args: An event type that corresponds with the function call

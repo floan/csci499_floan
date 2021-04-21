@@ -27,8 +27,20 @@ Status FazClient::Event(Any request, Any *response, int eventType) {
 }
 
 Status FazClient::StreamEvent(const Any request,
-                              ServerWriter<EventReply> *reply, int eventType) {
-  return Status::OK;
+                              std::function<void(EventReply)> &callback,
+                              int eventType) {
+  // setup vars for sending to server
+  EventRequest event_request;
+  ClientContext context;
+  *(event_request.mutable_payload()) = request;
+  event_request.set_event_type(eventType);
+  std::unique_ptr<ClientReader<EventReply> > reader(
+      stub_->streamEvent(&context, event_request));
+  EventReply reply;
+  while (reader->Read(&reply)) {
+    callback(reply);
+  }
+  return reader->Finish();
 }
 
 Status FazClient::HookFunction(int eventType, std::string functionName) {
