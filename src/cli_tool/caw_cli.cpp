@@ -1,7 +1,7 @@
+#include <gflags/gflags.h>
+
 #include <iostream>
 #include <string>
-
-#include <gflags/gflags.h>
 
 #include "../caw/client/cpp_client/caw_client.h"
 
@@ -14,6 +14,7 @@ DEFINE_string(follow, "", "Starts following the given username");
 DEFINE_int64(read, -1, "Reads the caw thread starting at the given id");
 DEFINE_bool(profile, false,
             "Gets the user’s profile of following and followers");
+DEFINE_string(stream, "", "Streams all new caws containing the given hashtag");
 DEFINE_string(hook, "", "Hooks the given function");
 DEFINE_string(unhook, "", "Unhooks the given function");
 DEFINE_bool(hookall, false, "Hooks all stored functions");
@@ -31,7 +32,7 @@ int main(int argc, char *argv[]) {
   // Ensuring a username is always specified
   // With exception of registeruser
   if (FLAGS_registeruser == "" && FLAGS_user == "" && FLAGS_hook == "" &&
-      FLAGS_unhook == "" && FLAGS_unhookall == false &&
+      FLAGS_unhook == "" && FLAGS_unhookall == false && FLAGS_stream == "" &&
       FLAGS_hookall == false) {
     std::cerr << "You cannot perform any action other than hooking/unhooking "
                  "without specifying a username"
@@ -73,6 +74,8 @@ int main(int argc, char *argv[]) {
     bool readSuccess = client.ReadCaw(FLAGS_read);
   } else if (FLAGS_profile) {
     bool profileSuccess = client.GetProfile(FLAGS_user);
+  } else if (FLAGS_stream != "") {
+    bool streamSuccess = client.StreamHashtag(FLAGS_stream);
   } else if (FLAGS_hook != "") {
     bool hookSuccess = client.HookFunction(FLAGS_hook);
   } else if (FLAGS_unhook != "") {
