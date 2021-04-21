@@ -78,7 +78,7 @@ Here is a list of all of Caws features!
 5. `follow` to follow a fellow caw user!
 6. `read` to read a thread of caws! 
 7. `profile` to get a list of the users followers and following! 
-
+8. `stream` Streams all new caws containing ‘hashtag’! 
 
 Caw is designed to allow the user to interract with it through the command line. All commands should be run within the build folder. Please read on to learn more about the commands and how to use them! 
 
@@ -97,6 +97,8 @@ The caw application provides you a client in both CPP and Go. To use the CPP cli
 6. In order to read a caw thread, you must specify your username and the thread id which you wish to begin reading from. You can specify the caw id to start reading from using our `--read` flag. Here is an example: `<client> --user "fayez" --read 1`.
 
 7. In order to display a profile, you must specify the username of the profile you wish to see! Here is an example: `<client> --user "fayez" --profile`.
+
+8. Stream returns all new caws containing the given hashtag that are created after the time of the stream call.  Stream only works in the C++ client.  Here is an example: `<client> --stream helloWorld`. 
 
 If you are looking for more information, or just feel a little lost, feel free to use the command `<client> --help` for more information! Lastly, if you have any issues with the program, or you want to suggest an upgrade, feel free to create an issue on our github page! 
 
