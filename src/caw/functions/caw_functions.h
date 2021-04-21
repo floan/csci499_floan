@@ -79,11 +79,9 @@ Status GetProfile(const Any &EventRequest, Any &EventReply,
                   KeyValueStoreInterface &kvstore);
 // streams Caws that contain the provided hashtag
 // Args: EventRequest: that contains a TagRequesst which contains the hashtag
-//       EventReply: that contains a ProfileReply
 //       std::function: callback function to execute when new Caw contains the
 //       provided hashtag
 // Returns: Status indicating success / error message
-Status StreamTag(const Any &EventRequest, Any &EventReply,
-                 KeyValueStoreInterface &kvstore,
-                 std::function<bool(std::string)> &);
+Status StreamTag(const Any &EventRequest, KeyValueStoreInterface &kvstore,
+                 std::function<bool(Any &)> &callback);
 #endif

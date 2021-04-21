@@ -1,16 +1,15 @@
 #ifndef FAZ_SERVER_
 #define FAZ_SERVER_
 
-#include "faz.grpc.pb.h"
-
-#include <unordered_map>
-
 #include <google/protobuf/any.pb.h>
 #include <grpcpp/grpcpp.h>
+
+#include <unordered_map>
 
 #include "../../caw/functions/caw_functions.h"
 #include "../../key_value_store/KeyValueStoreInterface.h"
 #include "../../key_value_store/client/kvstore_client.h"
+#include "faz.grpc.pb.h"
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -41,7 +40,8 @@ class FazServiceImpl final : public faz::FazService::Service {
                         {"caw", PostCaw},
                         {"read", ReadCaw},
                         {"follow", FollowUser},
-                        {"profile", GetProfile}}) {}
+                        {"profile", GetProfile}}),
+        caw_stream_functions_({{"hashtag", StreamTag}}) {}
 
   // This function 'hooks' a function that can
   // then be called for use by the Faz client
@@ -75,9 +75,10 @@ class FazServiceImpl final : public faz::FazService::Service {
   Status event(ServerContext *context, const EventRequest *request,
                EventReply *response) override;
 
-  // stream events from server-side to client
-  Status streamEvent(ServerContext* context, const EventRequest* request,
-                      ServerWriter<EventReply>* reply) override;
+  // stream events from server-side to client.  Same functionality and logic
+  // ass the event function except for streaming
+  Status streamEvent(ServerContext *context, const EventRequest *request,
+                     ServerWriter<EventReply> *reply) override;
 
  private:
   // This is a string -> function mapping of
@@ -86,6 +87,12 @@ class FazServiceImpl final : public faz::FazService::Service {
       std::string,
       std::function<Status(const Any &, Any &, KeyValueStoreInterface &)>>
       caw_functions_;
+  // This is a string -> strema function mapping of
+  // caw functions that use a callback for streaming.
+  std::unordered_map<std::string,
+                     std::function<Status(const Any &, KeyValueStoreInterface &,
+                                          std::function<bool(Any &)> &)>>
+      caw_stream_functions_;
   // This is an int to string mapping of hooked functions
   // We will register an event type with a string that will
   // correspond to a function name in caw_functions.
