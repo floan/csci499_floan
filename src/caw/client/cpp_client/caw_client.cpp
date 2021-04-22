@@ -203,25 +203,27 @@ bool CawClient::StreamHashtag(const std::string &hashtag) {
   Any request;
   request.PackFrom(hashtag_request);
   // Reads and prints the Caw
-  std::function<void(EventReply)> callback = [](EventReply event_reply) {
-    HashtagReply reply;
-    Any(event_reply.payload()).UnpackTo(&reply);
-    Caw caw = reply.caw();
-    std::cout << "\t"
-              << "Username: " << caw.username() << std::endl;
-    std::cout << "\t"
-              << "Text: " << caw.text() << std::endl;
-    std::cout << "\t"
-              << "Id: " << caw.id() << std::endl;
-    std::cout << "\t"
-              << "Parent_Id: " << caw.parent_id() << std::endl;
-    std::cout << "\t"
-              << "Time created: " << caw.timestamp().seconds() << std::endl;
-    std::cout << "\t"
-              << "==============================" << std::endl;
-  };
-  Status status =
-      client_.StreamEvent(request, callback, functionToEventType_["hashtag"]);
+  std::function<void(EventReply)> faz_client_callback =
+      [](EventReply event_reply) {
+        HashtagReply reply;
+        // unpack EventReply member payload (type Any) to HashtagReply object
+        Any(event_reply.payload()).UnpackTo(&reply);
+        Caw caw = reply.caw();
+        std::cout << "\t"
+                  << "Username: " << caw.username() << std::endl;
+        std::cout << "\t"
+                  << "Text: " << caw.text() << std::endl;
+        std::cout << "\t"
+                  << "Id: " << caw.id() << std::endl;
+        std::cout << "\t"
+                  << "Parent_Id: " << caw.parent_id() << std::endl;
+        std::cout << "\t"
+                  << "Time created: " << caw.timestamp().seconds() << std::endl;
+        std::cout << "\t"
+                  << "==============================" << std::endl;
+      };
+  Status status = client_.StreamEvent(request, faz_client_callback,
+                                      functionToEventType_["hashtag"]);
   if (!status.ok()) {
     if (status.error_code() == grpc::StatusCode::NOT_FOUND) {
       std::cout
