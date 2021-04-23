@@ -196,6 +196,46 @@ bool CawClient::GetProfile(const std::string &username) {
   return profileSuccessBool;
 }
 
+bool CawClient::StreamHashtag(const std::string &hashtag) {
+  std::cout << "Streaming Caws with hashtag: #" << hashtag << std::endl;
+  HashtagRequest hashtag_request;
+  hashtag_request.set_hashtag(hashtag);
+  Any request;
+  request.PackFrom(hashtag_request);
+  // Reads and prints the Caw
+  std::function<void(EventReply)> faz_client_callback =
+      [](EventReply event_reply) {
+        HashtagReply reply;
+        // unpack EventReply member payload (type Any) to HashtagReply object
+        Any(event_reply.payload()).UnpackTo(&reply);
+        Caw caw = reply.caw();
+        std::cout << "\t"
+                  << "Username: " << caw.username() << std::endl;
+        std::cout << "\t"
+                  << "Text: " << caw.text() << std::endl;
+        std::cout << "\t"
+                  << "Id: " << caw.id() << std::endl;
+        std::cout << "\t"
+                  << "Parent_Id: " << caw.parent_id() << std::endl;
+        std::cout << "\t"
+                  << "Time created: " << caw.timestamp().seconds() << std::endl;
+        std::cout << "\t"
+                  << "==============================" << std::endl;
+      };
+  Status status = client_.StreamEvent(request, faz_client_callback,
+                                      functionToEventType_["hashtag"]);
+  if (!status.ok()) {
+    if (status.error_code() == grpc::StatusCode::NOT_FOUND) {
+      std::cout
+          << "This event was not found.  You may need to hook this function."
+          << std::endl;
+    } else {
+      std::cout << "There was an internal error." << std::endl;
+    }
+  }
+  return status.ok();
+}
+
 bool CawClient::HookFunction(std::string functionName) {
   Status status =
       client_.HookFunction(functionToEventType_[functionName], functionName);

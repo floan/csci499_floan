@@ -1,18 +1,17 @@
 #ifndef CAW_CLIENT_
 #define CAW_CLIENT_
 
-#include "caw.pb.h"
+#include <glog/logging.h>
+#include <google/protobuf/any.pb.h>
+#include <grpcpp/grpcpp.h>
 
 #include <iostream>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-#include <glog/logging.h>
-#include <google/protobuf/any.pb.h>
-#include <grpcpp/grpcpp.h>
-
 #include "../../../faz/client/cpp_client/faz_client.h"
+#include "caw.pb.h"
 
 using google::protobuf::Any;
 using grpc::Channel;
@@ -25,6 +24,8 @@ using caw::CawReply;
 using caw::CawRequest;
 using caw::FollowReply;
 using caw::FollowRequest;
+using caw::HashtagReply;
+using caw::HashtagRequest;
 using caw::ProfileReply;
 using caw::ProfileRequest;
 using caw::ReadReply;
@@ -47,7 +48,8 @@ class CawClient final {
                               {"caw", 2},
                               {"read", 3},
                               {"follow", 4},
-                              {"profile", 5}}) {}
+                              {"profile", 5},
+                              {"hashtag", 6}}) {}
 
   // Calls the Faz server to perform the
   // Following operations
@@ -78,6 +80,11 @@ class CawClient final {
   // Args: username of user whose lists we want
   // Returns: a vector of two vectors, followers and following
   bool GetProfile(const std::string &username);
+  // Streams hashtag provided by the argument so that every new Caw created that
+  // contains the given hashtag will be returned if it is while the user is
+  // streaming.
+  // Returns if error on the backend
+  bool StreamHashtag(const std::string &hashtag);
 
   bool HookFunction(std::string functionName);
   bool UnhookFunction(std::string functionName);
