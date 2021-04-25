@@ -65,20 +65,18 @@ bool CawClient::PostCaw(const std::string &username, const std::string &text,
     // Extract caw from response
     response->UnpackTo(&caw_response);
     caw = caw_response.caw();
-    if(!caw.username().empty()) { // handles edge case where bad caw object is returned
-      std::cout << "Your caw was posted successfully!" << std::endl;
-      std::cout << "Here's your caw information: " << std::endl;
-      std::cout << "\t"
-                << "Username: " << caw.username() << std::endl;
-      std::cout << "\t"
-                << "Text: " << caw.text() << std::endl;
-      std::cout << "\t"
-                << "Id: " << caw.id() << std::endl;
-      std::cout << "\t"
-                << "Parent_Id: " << caw.parent_id() << std::endl;
-      std::cout << "\t"
-                << "Time created: " << caw.timestamp().seconds() << std::endl;
-    }
+    std::cout << "Your caw was posted successfully!" << std::endl;
+    std::cout << "Here's your caw information: " << std::endl;
+    std::cout << "\t"
+              << "Username: " << caw.username() << std::endl;
+    std::cout << "\t"
+              << "Text: " << caw.text() << std::endl;
+    std::cout << "\t"
+              << "Id: " << caw.id() << std::endl;
+    std::cout << "\t"
+              << "Parent_Id: " << caw.parent_id() << std::endl;
+    std::cout << "\t"
+              << "Time created: " << caw.timestamp().seconds() << std::endl;
     postCawSuccessBool = true;
   } else {
     std::cout << "There was an error in posting your caw." << std::endl;
@@ -211,6 +209,9 @@ bool CawClient::StreamHashtag(const std::string &hashtag) {
         // unpack EventReply member payload (type Any) to HashtagReply object
         Any(event_reply.payload()).UnpackTo(&reply);
         Caw caw = reply.caw();
+        if(caw.username().empty()) { // handles edge case where bad caw object is returned
+          return;
+        }
         std::cout << "\t"
                   << "Username: " << caw.username() << std::endl;
         std::cout << "\t"
